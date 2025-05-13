@@ -25,11 +25,11 @@ public class RewardsService {
 	private int proximityBuffer = defaultProximityBuffer;
 	private int attractionProximityRange = 200;
 	private final GpsUtil gpsUtil;
-	private final RewardCentral rewardsCentral;
+	private final RewardCentral rewardCentral;
 	
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
-		this.rewardsCentral = rewardCentral;
+		this.rewardCentral = rewardCentral;
 	}
 	
 	public void setProximityBuffer(int proximityBuffer) {
@@ -65,7 +65,7 @@ public class RewardsService {
 	}
 	
 	private int getRewardPoints(Attraction attraction, User user) {
-		return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
+		return rewardCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
 	}
 	
 	public double getDistance(Location loc1, Location loc2) {
