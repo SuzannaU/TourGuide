@@ -42,10 +42,8 @@ public class RewardsService {
 	
 	public void calculateRewards(User user) {
 		List<VisitedLocation> userLocations = user.getVisitedLocations();
-		CopyOnWriteArrayList<VisitedLocation> cowUserLocations = new CopyOnWriteArrayList<>(userLocations);
 		List<Attraction> attractions = gpsUtil.getAttractions();
-
-		for (VisitedLocation visitedLocation : cowUserLocations) {
+		for (VisitedLocation visitedLocation : userLocations) {
 			for (Attraction attraction : attractions) {
 				if (user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
 					if (nearAttraction(visitedLocation, attraction)) {
