@@ -7,16 +7,18 @@ import java.util.List;
 import java.util.UUID;
 
 import com.openclassrooms.tourguide.model.NearbyAttraction;
+import com.openclassrooms.tourguide.service.libs.GpsUtilService;
+import com.openclassrooms.tourguide.service.libs.RewardCentralService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import gpsUtil.GpsUtil;
 import gpsUtil.location.VisitedLocation;
 import rewardCentral.RewardCentral;
-import com.openclassrooms.tourguide.helper.InternalTestHelper;
-import com.openclassrooms.tourguide.service.RewardsService;
-import com.openclassrooms.tourguide.service.TourGuideService;
-import com.openclassrooms.tourguide.user.User;
+import com.openclassrooms.tourguide.initializer.InternalTestHelper;
+import com.openclassrooms.tourguide.service.model.RewardsService;
+import com.openclassrooms.tourguide.service.model.TourGuideService;
+import com.openclassrooms.tourguide.model.user.User;
 import tripPricer.Provider;
 
 public class TestTourGuideService {
@@ -27,9 +29,11 @@ public class TestTourGuideService {
     public void setup() {
 
         GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+        GpsUtilService gpsUtilService = new GpsUtilService(gpsUtil);
         RewardCentral rewardCentral = new RewardCentral();
-        tourGuideService = new TourGuideService(gpsUtil, rewardCentral, rewardsService);
+        RewardCentralService  rewardCentralService = new RewardCentralService(rewardCentral);
+        RewardsService rewardsService = new RewardsService(gpsUtilService, rewardCentralService);
+        tourGuideService = new TourGuideService(gpsUtilService, rewardCentralService, rewardsService);
 
         InternalTestHelper.setInternalUserNumber(0);
     }

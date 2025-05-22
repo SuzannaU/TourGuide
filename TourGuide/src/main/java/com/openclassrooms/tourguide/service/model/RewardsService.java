@@ -1,19 +1,18 @@
-package com.openclassrooms.tourguide.service;
+package com.openclassrooms.tourguide.service.model;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.openclassrooms.tourguide.service.libs.GpsUtilService;
+import com.openclassrooms.tourguide.service.libs.RewardCentralService;
+import gpsUtil.location.Attraction;
+import gpsUtil.location.Location;
+import gpsUtil.location.VisitedLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
-import rewardCentral.RewardCentral;
-import com.openclassrooms.tourguide.user.User;
-import com.openclassrooms.tourguide.user.UserReward;
+import com.openclassrooms.tourguide.model.user.User;
+import com.openclassrooms.tourguide.model.user.UserReward;
 
 @Service
 public class RewardsService {
@@ -24,12 +23,12 @@ public class RewardsService {
     private int defaultProximityBuffer = 10;
 	private int proximityBuffer = defaultProximityBuffer;
 	private int attractionProximityRange = 200;
-	private final GpsUtil gpsUtil;
-	private final RewardCentral rewardCentral;
+	private final GpsUtilService gpsUtilService;
+	private final RewardCentralService rewardCentralService;
 	
-	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
-		this.gpsUtil = gpsUtil;
-		this.rewardCentral = rewardCentral;
+	public RewardsService(GpsUtilService gpsUtilService, RewardCentralService rewardCentralService) {
+		this.gpsUtilService = gpsUtilService;
+		this.rewardCentralService = rewardCentralService;
 	}
 	
 	public void setProximityBuffer(int proximityBuffer) {
@@ -42,7 +41,7 @@ public class RewardsService {
 	
 	public void calculateRewards(User user) {
 		List<VisitedLocation> userLocations = user.getVisitedLocations();
-		List<Attraction> attractions = gpsUtil.getAttractions();
+		List<Attraction> attractions = gpsUtilService.getAttractions();
 		for (VisitedLocation visitedLocation : userLocations) {
 			for (Attraction attraction : attractions) {
 				if (user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
@@ -63,7 +62,7 @@ public class RewardsService {
 	}
 	
 	private int getRewardPoints(Attraction attraction, User user) {
-		return rewardCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
+		return rewardCentralService.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
 	}
 	
 	public double getDistance(Location loc1, Location loc2) {

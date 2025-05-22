@@ -1,10 +1,13 @@
-package com.openclassrooms.tourguide.service;
+package com.openclassrooms.tourguide.service.model;
 
-import com.openclassrooms.tourguide.helper.InternalTestHelper;
+import com.openclassrooms.tourguide.initializer.InternalTestHelper;
 import com.openclassrooms.tourguide.model.NearbyAttraction;
+import com.openclassrooms.tourguide.service.libs.GpsUtilService;
+import com.openclassrooms.tourguide.service.libs.RewardCentralService;
+import com.openclassrooms.tourguide.service.libs.TripPricerService;
 import com.openclassrooms.tourguide.tracker.Tracker;
-import com.openclassrooms.tourguide.user.User;
-import com.openclassrooms.tourguide.user.UserReward;
+import com.openclassrooms.tourguide.model.user.User;
+import com.openclassrooms.tourguide.model.user.UserReward;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -12,32 +15,29 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import gpsUtil.location.Location;
+import gpsUtil.location.Attraction;
+import gpsUtil.location.VisitedLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
-
-import rewardCentral.RewardCentral;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
 @Service
 public class TourGuideService {
-    private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
-    private final GpsUtil gpsUtil;
-    private final RewardCentral rewardCentral;
+    private final Logger logger = LoggerFactory.getLogger(TourGuideService.class);
+    private final GpsUtilService gpsUtilService;
+    private final RewardCentralService rewardCentralService;
     private final RewardsService rewardsService;
-    private final TripPricer tripPricer = new TripPricer();
+    private final TripPricer tripPricer = new  TripPricer();
+    private final TripPricerService tripPricerService = new TripPricerService(tripPricer);
     public final Tracker tracker;
     boolean testMode = true;
 
-    public TourGuideService(GpsUtil gpsUtil, RewardCentral rewardCentral, RewardsService rewardsService) {
-        this.gpsUtil = gpsUtil;
-        this.rewardCentral = rewardCentral;
+    public TourGuideService(GpsUtilService gpsUtilService, RewardCentralService rewardCentralService, RewardsService rewardsService) {
+        this.gpsUtilService = gpsUtilService;
+        this.rewardCentralService = rewardCentralService;
         this.rewardsService = rewardsService;
 
         Locale.setDefault(Locale.US);
@@ -80,7 +80,7 @@ public class TourGuideService {
 
     public List<Provider> getTripDeals(User user) {
         int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
-        List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(),
+        List<Provider> providers = tripPricerService.getPrice(tripPricerServiceApiKey, user.getUserId(),
                 user.getUserPreferences().getNumberOfAdults(), user.getUserPreferences().getNumberOfChildren(),
                 user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
         user.setTripDeals(providers);
@@ -88,7 +88,7 @@ public class TourGuideService {
     }
 
     public VisitedLocation trackUserLocation(User user) {
-        VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+        VisitedLocation visitedLocation = gpsUtilService.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocation);
         rewardsService.calculateRewards(user); // move to getUserRewards
         return visitedLocation;
@@ -98,7 +98,7 @@ public class TourGuideService {
         VisitedLocation visitedLocation = getUserLocation(getUser(userName));
         Map<Attraction, Double> distances = new HashMap<>();
 
-        for (Attraction attraction : gpsUtil.getAttractions()) {
+        for (Attraction attraction : gpsUtilService.getAttractions()) {
             double distance = rewardsService.getDistance(visitedLocation.location, attraction);
             distances.put(attraction, distance);
         }
@@ -118,7 +118,7 @@ public class TourGuideService {
                     visitedLocation.location.latitude,
                     visitedLocation.location.longitude,
                     sortedMap.get(attraction),
-                    rewardCentral.getAttractionRewardPoints(attraction.attractionId, getUser(userName).getUserId())
+                    rewardCentralService.getAttractionRewardPoints(attraction.attractionId, getUser(userName).getUserId())
             );
             nearbyAttractions.add(nearbyAttraction);
         }
@@ -138,7 +138,7 @@ public class TourGuideService {
      * Methods Below: For Internal Testing
      *
      **********************************************************************************/
-    private static final String tripPricerApiKey = "test-server-api-key";
+    private static final String tripPricerServiceApiKey = "test-server-api-key";
     // Database connection will be used for external users, but for testing purposes
     // internal users are provided and stored in memory
     private final Map<String, User> internalUserMap = new HashMap<>();
