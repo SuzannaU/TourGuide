@@ -6,16 +6,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.UUID;
 
+import com.openclassrooms.tourguide.manager.InternalUsersManager;
+import com.openclassrooms.tourguide.manager.TrackerManager;
 import com.openclassrooms.tourguide.model.NearbyAttraction;
 import com.openclassrooms.tourguide.service.libs.GpsUtilService;
 import com.openclassrooms.tourguide.service.libs.RewardCentralService;
+import com.openclassrooms.tourguide.tracker.Tracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import gpsUtil.GpsUtil;
 import gpsUtil.location.VisitedLocation;
 import rewardCentral.RewardCentral;
-import com.openclassrooms.tourguide.initializer.InternalTestHelper;
+import com.openclassrooms.tourguide.manager.InternalTestHelper;
 import com.openclassrooms.tourguide.service.model.RewardsService;
 import com.openclassrooms.tourguide.service.model.TourGuideService;
 import com.openclassrooms.tourguide.model.user.User;
@@ -24,6 +27,7 @@ import tripPricer.Provider;
 public class TestTourGuideService {
 
     private TourGuideService tourGuideService;
+    private TrackerManager trackerManager;
 
     @BeforeEach
     public void setup() {
@@ -34,8 +38,10 @@ public class TestTourGuideService {
         RewardCentralService  rewardCentralService = new RewardCentralService(rewardCentral);
         RewardsService rewardsService = new RewardsService(gpsUtilService, rewardCentralService);
         tourGuideService = new TourGuideService(gpsUtilService, rewardCentralService, rewardsService);
+        Tracker tracker = new Tracker(tourGuideService);
+        trackerManager = new TrackerManager(tracker);
 
-        InternalTestHelper.setInternalUserNumber(0);
+        InternalUsersManager.setInternalUserNumber(0);
     }
 
     @Test
@@ -43,7 +49,7 @@ public class TestTourGuideService {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
-        tourGuideService.tracker.stopTracking();
+        trackerManager.stopTracking();
         assertEquals(visitedLocation.userId, user.getUserId());
     }
 
@@ -59,7 +65,7 @@ public class TestTourGuideService {
         User retrivedUser = tourGuideService.getUser(user.getUserName());
         User retrivedUser2 = tourGuideService.getUser(user2.getUserName());
 
-        tourGuideService.tracker.stopTracking();
+        trackerManager.stopTracking();
 
         assertEquals(user, retrivedUser);
         assertEquals(user2, retrivedUser2);
@@ -76,7 +82,7 @@ public class TestTourGuideService {
 
         List<User> allUsers = tourGuideService.getAllUsers();
 
-        tourGuideService.tracker.stopTracking();
+        trackerManager.stopTracking();
 
         assertTrue(allUsers.contains(user));
         assertTrue(allUsers.contains(user2));
@@ -88,7 +94,7 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
 
-        tourGuideService.tracker.stopTracking();
+        trackerManager.stopTracking();
 
         assertEquals(user.getUserId(), visitedLocation.userId);
     }
@@ -102,7 +108,7 @@ public class TestTourGuideService {
 
         List<NearbyAttraction> attractions = tourGuideService.getNearByAttractions(user.getUserName());
 
-        tourGuideService.tracker.stopTracking();
+        trackerManager.stopTracking();
 
         assertEquals(5, attractions.size());
     }
@@ -113,7 +119,7 @@ public class TestTourGuideService {
 
         List<Provider> providers = tourGuideService.getTripDeals(user);
 
-        tourGuideService.tracker.stopTracking();
+        trackerManager.stopTracking();
 
         assertEquals(10, providers.size());
     }
