@@ -12,7 +12,10 @@ public class AppManager {
 
     private final InternalUsersManager internalUsersManager;
     private final TrackerManager trackerManager;
-    boolean testMode = true;
+
+    // Set this default up to 100,000 for testing
+    private static int internalUserNumber = 3;
+    public static boolean testMode = false;
 
     public AppManager(InternalUsersManager internalUsersManager, TrackerManager trackerManager) {
         this.internalUsersManager = internalUsersManager;
@@ -22,8 +25,17 @@ public class AppManager {
 
         if (testMode) {
             logger.info("TestMode enabled");
-            internalUsersManager.initializeInternalUsers();
+        } else {
+            InternalUsersManager.initializeInternalUsers(internalUserNumber);
             trackerManager.initializeTracker();
         }
+    }
+
+    public static void setInternalUserNumber(int internalUserNumber) {
+        AppManager.internalUserNumber = internalUserNumber;
+    }
+
+    public static int getInternalUserNumber() {
+        return internalUserNumber;
     }
 }

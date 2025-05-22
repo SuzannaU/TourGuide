@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.openclassrooms.tourguide.manager.TrackerManager;
+import com.openclassrooms.tourguide.service.model.UserService;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.openclassrooms.tourguide.service.model.TourGuideService;
 import com.openclassrooms.tourguide.model.user.User;
 import org.springframework.stereotype.Component;
 
@@ -16,10 +16,10 @@ import org.springframework.stereotype.Component;
 public class Tracker extends Thread {
 	private final Logger logger = LoggerFactory.getLogger(Tracker.class);
 	private static final long trackingPollingInterval = TimeUnit.MINUTES.toSeconds(5);
-	private final TourGuideService tourGuideService;
+	private final UserService UserService;
 
-	public Tracker(TourGuideService tourGuideService) {
-		this.tourGuideService = tourGuideService;
+	public Tracker(UserService UserService) {
+		this.UserService = UserService;
 	}
 
 	@Override
@@ -31,10 +31,10 @@ public class Tracker extends Thread {
 				break;
 			}
 
-			List<User> users = tourGuideService.getAllUsers();
+			List<User> users = UserService.getAllUsers();
 			logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
 			stopWatch.start();
-			users.forEach(u -> tourGuideService.trackUserLocation(u));
+			users.forEach(u -> UserService.trackUserLocation(u));
 			stopWatch.stop();
 			logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
 			stopWatch.reset();

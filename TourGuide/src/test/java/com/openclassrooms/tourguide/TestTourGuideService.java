@@ -6,50 +6,51 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.UUID;
 
+import com.openclassrooms.tourguide.manager.AppManager;
 import com.openclassrooms.tourguide.manager.InternalUsersManager;
 import com.openclassrooms.tourguide.manager.TrackerManager;
 import com.openclassrooms.tourguide.model.NearbyAttraction;
-import com.openclassrooms.tourguide.service.libs.GpsUtilService;
-import com.openclassrooms.tourguide.service.libs.RewardCentralService;
-import com.openclassrooms.tourguide.tracker.Tracker;
+import com.openclassrooms.tourguide.service.model.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import gpsUtil.GpsUtil;
 import gpsUtil.location.VisitedLocation;
-import rewardCentral.RewardCentral;
-import com.openclassrooms.tourguide.manager.InternalTestHelper;
-import com.openclassrooms.tourguide.service.model.RewardsService;
-import com.openclassrooms.tourguide.service.model.TourGuideService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import com.openclassrooms.tourguide.model.user.User;
 import tripPricer.Provider;
 
+@SpringBootTest
 public class TestTourGuideService {
+    private static final Logger logger = LoggerFactory.getLogger(TestTourGuideService.class);
 
-    private TourGuideService tourGuideService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private AttractionService attractionService;
+    @Autowired
     private TrackerManager trackerManager;
 
-    @BeforeEach
-    public void setup() {
+    @BeforeAll
+    public static void setUpClass() {
+        AppManager.testMode = true;
+    }
 
-        GpsUtil gpsUtil = new GpsUtil();
-        GpsUtilService gpsUtilService = new GpsUtilService(gpsUtil);
-        RewardCentral rewardCentral = new RewardCentral();
-        RewardCentralService  rewardCentralService = new RewardCentralService(rewardCentral);
-        RewardsService rewardsService = new RewardsService(gpsUtilService, rewardCentralService);
-        tourGuideService = new TourGuideService(gpsUtilService, rewardCentralService, rewardsService);
-        Tracker tracker = new Tracker(tourGuideService);
-        trackerManager = new TrackerManager(tracker);
-
-        InternalUsersManager.setInternalUserNumber(0);
+    @AfterEach
+    public void afterEach() {
+        InternalUsersManager.getInternalUserMap().clear();
+        trackerManager.stopTracking();
     }
 
     @Test
     public void getUserLocation() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
-        trackerManager.stopTracking();
+        VisitedLocation visitedLocation = userService.trackUserLocation(user);
         assertEquals(visitedLocation.userId, user.getUserId());
     }
 
@@ -59,16 +60,14 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-        tourGuideService.addUser(user);
-        tourGuideService.addUser(user2);
+        userService.addUser(user);
+        userService.addUser(user2);
 
-        User retrivedUser = tourGuideService.getUser(user.getUserName());
-        User retrivedUser2 = tourGuideService.getUser(user2.getUserName());
+        User retrievedUser = userService.getUser(user.getUserName());
+        User retrievedUser2 = userService.getUser(user2.getUserName());
 
-        trackerManager.stopTracking();
-
-        assertEquals(user, retrivedUser);
-        assertEquals(user2, retrivedUser2);
+        assertEquals(user, retrievedUser);
+        assertEquals(user2, retrievedUser2);
     }
 
     @Test
@@ -77,12 +76,10 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-        tourGuideService.addUser(user);
-        tourGuideService.addUser(user2);
+        userService.addUser(user);
+        userService.addUser(user2);
 
-        List<User> allUsers = tourGuideService.getAllUsers();
-
-        trackerManager.stopTracking();
+        List<User> allUsers = userService.getAllUsers();
 
         assertTrue(allUsers.contains(user));
         assertTrue(allUsers.contains(user2));
@@ -92,9 +89,7 @@ public class TestTourGuideService {
     public void trackUser() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
-
-        trackerManager.stopTracking();
+        VisitedLocation visitedLocation = userService.trackUserLocation(user);
 
         assertEquals(user.getUserId(), visitedLocation.userId);
     }
@@ -103,12 +98,10 @@ public class TestTourGuideService {
     public void getNearbyAttractions() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        tourGuideService.addUser(user);
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+        userService.addUser(user);
+        VisitedLocation visitedLocation = userService.trackUserLocation(user);
 
-        List<NearbyAttraction> attractions = tourGuideService.getNearByAttractions(user.getUserName());
-
-        trackerManager.stopTracking();
+        List<NearbyAttraction> attractions = attractionService.getNearByAttractions(user.getUserName());
 
         assertEquals(5, attractions.size());
     }
@@ -117,9 +110,7 @@ public class TestTourGuideService {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 
-        List<Provider> providers = tourGuideService.getTripDeals(user);
-
-        trackerManager.stopTracking();
+        List<Provider> providers = userService.getTripDeals(user.getUserName());
 
         assertEquals(10, providers.size());
     }

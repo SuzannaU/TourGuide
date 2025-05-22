@@ -7,75 +7,88 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.openclassrooms.tourguide.manager.AppManager;
 import com.openclassrooms.tourguide.manager.InternalUsersManager;
 import com.openclassrooms.tourguide.manager.TrackerManager;
 import com.openclassrooms.tourguide.service.libs.GpsUtilService;
-import com.openclassrooms.tourguide.service.libs.RewardCentralService;
-import com.openclassrooms.tourguide.tracker.Tracker;
+import com.openclassrooms.tourguide.service.model.LocationUtil;
+import com.openclassrooms.tourguide.service.model.UserService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
-import rewardCentral.RewardCentral;
-import com.openclassrooms.tourguide.manager.InternalTestHelper;
-import com.openclassrooms.tourguide.service.model.RewardsService;
-import com.openclassrooms.tourguide.service.model.TourGuideService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import com.openclassrooms.tourguide.model.user.User;
 import com.openclassrooms.tourguide.model.user.UserReward;
 
+@SpringBootTest
 public class TestRewardsService {
+    private static final Logger logger = LoggerFactory.getLogger(TestRewardsService.class);
 
-	private GpsUtilService gpsUtilService;
-    private TourGuideService tourGuideService;
-	private RewardsService rewardsService;
-	private TrackerManager trackerManager;
+    @Autowired
+    private GpsUtilService gpsUtilService;
+    @Autowired
+    private TrackerManager trackerManager;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private LocationUtil locationUtil;
+
+    @BeforeAll
+    public static void setUpClass() {
+        AppManager.testMode = true;
+    }
 
     @BeforeEach
-	public void setup() {
+    public void beforeEach() {
+        locationUtil.setProximityBuffer(locationUtil.getDefaultProximityBuffer());
+    }
 
-		GpsUtil gpsUtil = new GpsUtil();
-        gpsUtilService = new GpsUtilService(gpsUtil);
-		RewardCentral rewardCentral = new RewardCentral();
-        RewardCentralService rewardCentralService = new RewardCentralService(rewardCentral);
-		rewardsService = new RewardsService(gpsUtilService, rewardCentralService);
-		tourGuideService = new TourGuideService(gpsUtilService, rewardCentralService, rewardsService);
-		Tracker tracker = new Tracker(tourGuideService);
-		trackerManager = new TrackerManager(tracker);
+    @AfterEach
+    public void afterEach() {
+        InternalUsersManager.getInternalUserMap().clear();
+        trackerManager.stopTracking();
+    }
 
-	}
+    @Test
+    public void userGetRewards() {
 
-	@Test
-	public void userGetRewards() {
+        InternalUsersManager.initializeInternalUsers(5);
+        logger.info("map size {}", InternalUsersManager.getInternalUserMap().size());
 
-		InternalUsersManager.setInternalUserNumber(0);
-		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-		Attraction attraction = gpsUtilService.getAttractions().get(0);
-		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
-		tourGuideService.trackUserLocation(user);
-		List<UserReward> userRewards = user.getUserRewards();
-		trackerManager.stopTracking();
-		assertTrue(userRewards.size() == 1);
-	}
+        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        Attraction attraction = gpsUtilService.getAttractions().get(0);
+        user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
 
-	@Test
-	public void isWithinAttractionProximity() {
-		Attraction attraction = gpsUtilService.getAttractions().get(0);
-		assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
-	}
+        userService.trackUserLocation(user);
 
-	@Test
-	public void nearAllAttractions() {
-		rewardsService.setProximityBuffer(Integer.MAX_VALUE);
+        List<UserReward> userRewards = user.getUserRewards();
 
-		InternalUsersManager.setInternalUserNumber(1);
+        assertEquals(1, userRewards.size());
+    }
 
-		rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
-		List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
-		trackerManager.stopTracking();
+    @Test
+    public void areWithinProximityRange() {
+        Attraction attraction = gpsUtilService.getAttractions().get(0);
+        assertTrue(locationUtil.areWithinProximityRange(attraction, attraction));
+    }
 
-		assertEquals(gpsUtilService.getAttractions().size(), userRewards.size());
-	}
+    @Test
+    public void nearAllAttractions() {
+        locationUtil.setProximityBuffer(Integer.MAX_VALUE);
+        InternalUsersManager.initializeInternalUsers(1);
+
+        logger.info("map size {}", InternalUsersManager.getInternalUserMap().size());
+        userService.calculateRewards(userService.getAllUsers().get(0));
+        List<UserReward> userRewards = userService.getUserRewards(userService.getAllUsers().get(0).getUserName());
+
+        assertEquals(gpsUtilService.getAttractions().size(), userRewards.size());
+    }
 
 }
