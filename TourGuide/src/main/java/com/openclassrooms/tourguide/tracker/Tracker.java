@@ -1,51 +1,40 @@
 package com.openclassrooms.tourguide.tracker;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import com.openclassrooms.tourguide.manager.TrackerManager;
+import com.openclassrooms.tourguide.service.model.UserService;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.openclassrooms.tourguide.service.TourGuideService;
-import com.openclassrooms.tourguide.user.User;
+import com.openclassrooms.tourguide.model.user.User;
+import org.springframework.stereotype.Component;
 
+@Component
 public class Tracker extends Thread {
 	private Logger logger = LoggerFactory.getLogger(Tracker.class);
 	private static final long trackingPollingInterval = TimeUnit.MINUTES.toSeconds(5);
-	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-	private final TourGuideService tourGuideService;
-	private boolean stop = false;
+	private final UserService UserService;
 
-	public Tracker(TourGuideService tourGuideService) {
-		this.tourGuideService = tourGuideService;
-
-		executorService.submit(this);
-	}
-
-	/**
-	 * Assures to shut down the Tracker thread
-	 */
-	public void stopTracking() {
-		stop = true;
-		executorService.shutdownNow();
+	public Tracker(UserService UserService) {
+		this.UserService = UserService;
 	}
 
 	@Override
 	public void run() {
 		StopWatch stopWatch = new StopWatch();
 		while (true) {
-			if (Thread.currentThread().isInterrupted() || stop) {
+			if (Thread.currentThread().isInterrupted() || TrackerManager.isTrackerStopped()) {
 				logger.debug("Tracker stopping");
 				break;
 			}
 
-			List<User> users = tourGuideService.getAllUsers();
+			List<User> users = UserService.getAllUsers();
 			logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
 			stopWatch.start();
-			//users.forEach(u -> tourGuideService.trackUserLocation(u));
+			users.forEach(u -> UserService.trackUserLocation(u));
 			stopWatch.stop();
 			logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
 			stopWatch.reset();

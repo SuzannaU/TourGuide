@@ -1,33 +1,29 @@
-package com.openclassrooms.tourguide;
+package com.openclassrooms.tourguide.controller;
 
 import java.util.List;
 
 import com.openclassrooms.tourguide.model.NearbyAttraction;
-import com.openclassrooms.tourguide.service.RewardsService;
-import gpsUtil.GpsUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.openclassrooms.tourguide.service.model.AttractionService;
+import com.openclassrooms.tourguide.service.model.UserService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
 
-import com.openclassrooms.tourguide.service.TourGuideService;
-import com.openclassrooms.tourguide.user.User;
-import com.openclassrooms.tourguide.user.UserReward;
+import com.openclassrooms.tourguide.model.user.UserReward;
 
-import rewardCentral.RewardCentral;
 import tripPricer.Provider;
 
 @RestController
 public class TourGuideController {
 
+    private final AttractionService attractionService;
+    private final UserService userService;
 
-	private final TourGuideService tourGuideService;
-
-    public TourGuideController(TourGuideService tourGuideService) {
-        this.tourGuideService = tourGuideService;
+    public TourGuideController(AttractionService attractionService, UserService userService) {
+        this.attractionService = attractionService;
+        this.userService = userService;
     }
 
     @RequestMapping("/")
@@ -37,12 +33,12 @@ public class TourGuideController {
     
     @RequestMapping("/getLocation") 
     public VisitedLocation getLocation(@RequestParam String userName) {
-    	return tourGuideService.getUserLocation(getUser(userName));
+    	return userService.getUserLocation(userName);
     }
 
     @RequestMapping("/getVisitedLocations")
     public List<VisitedLocation> getVisitedLocations(@RequestParam String userName) {
-        return tourGuideService.getUser(userName).getVisitedLocations();
+        return userService.getVisitedLocations(userName);
     }
     
     //  TODO: Change this method to no longer return a List of Attractions.
@@ -56,22 +52,17 @@ public class TourGuideController {
         //    Note: Attraction reward points can be gathered from RewardsCentral
     @RequestMapping("/getNearbyAttractions") 
     public List<NearbyAttraction> getNearbyAttractions(@RequestParam String userName) {
-    	return tourGuideService.getNearByAttractions(userName);
+    	return attractionService.getNearByAttractions(userName);
     }
     
     @RequestMapping("/getRewards") 
     public List<UserReward> getRewards(@RequestParam String userName) {
-    	return tourGuideService.getUserRewards(getUser(userName));
+    	return userService.getUserRewards(userName);
     }
        
     @RequestMapping("/getTripDeals")
     public List<Provider> getTripDeals(@RequestParam String userName) {
-    	return tourGuideService.getTripDeals(getUser(userName));
+    	return userService.getTripDeals(userName);
     }
-    
-    private User getUser(String userName) {
-    	return tourGuideService.getUser(userName);
-    }
-   
 
 }

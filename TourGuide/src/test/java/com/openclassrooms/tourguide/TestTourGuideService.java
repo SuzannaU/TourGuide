@@ -6,40 +6,46 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.UUID;
 
+import com.openclassrooms.tourguide.manager.AppManager;
+import com.openclassrooms.tourguide.manager.InternalUsersManager;
 import com.openclassrooms.tourguide.model.NearbyAttraction;
-import org.junit.jupiter.api.BeforeEach;
+import com.openclassrooms.tourguide.service.model.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import gpsUtil.GpsUtil;
 import gpsUtil.location.VisitedLocation;
-import rewardCentral.RewardCentral;
-import com.openclassrooms.tourguide.helper.InternalTestHelper;
-import com.openclassrooms.tourguide.service.RewardsService;
-import com.openclassrooms.tourguide.service.TourGuideService;
-import com.openclassrooms.tourguide.user.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import com.openclassrooms.tourguide.model.user.User;
 import tripPricer.Provider;
 
+@SpringBootTest
 public class TestTourGuideService {
+    private static final Logger logger = LoggerFactory.getLogger(TestTourGuideService.class);
 
-    private TourGuideService tourGuideService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private AttractionService attractionService;
 
-    @BeforeEach
-    public void setup() {
+    @BeforeAll
+    public static void setUpClass() {
+        AppManager.testMode = true;
+    }
 
-        GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-        RewardCentral rewardCentral = new RewardCentral();
-        tourGuideService = new TourGuideService(gpsUtil, rewardCentral, rewardsService);
-
-        InternalTestHelper.setInternalUserNumber(0);
+    @AfterEach
+    public void afterEach() {
+        InternalUsersManager.getInternalUserMap().clear();
     }
 
     @Test
     public void getUserLocation() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
-        tourGuideService.tracker.stopTracking();
+        VisitedLocation visitedLocation = userService.trackUserLocation(user);
         assertEquals(visitedLocation.userId, user.getUserId());
     }
 
@@ -49,16 +55,14 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-        tourGuideService.addUser(user);
-        tourGuideService.addUser(user2);
+        userService.addUser(user);
+        userService.addUser(user2);
 
-        User retrivedUser = tourGuideService.getUser(user.getUserName());
-        User retrivedUser2 = tourGuideService.getUser(user2.getUserName());
+        User retrievedUser = userService.getUser(user.getUserName());
+        User retrievedUser2 = userService.getUser(user2.getUserName());
 
-        tourGuideService.tracker.stopTracking();
-
-        assertEquals(user, retrivedUser);
-        assertEquals(user2, retrivedUser2);
+        assertEquals(user, retrievedUser);
+        assertEquals(user2, retrievedUser2);
     }
 
     @Test
@@ -67,12 +71,10 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-        tourGuideService.addUser(user);
-        tourGuideService.addUser(user2);
+        userService.addUser(user);
+        userService.addUser(user2);
 
-        List<User> allUsers = tourGuideService.getAllUsers();
-
-        tourGuideService.tracker.stopTracking();
+        List<User> allUsers = userService.getAllUsers();
 
         assertTrue(allUsers.contains(user));
         assertTrue(allUsers.contains(user2));
@@ -82,9 +84,7 @@ public class TestTourGuideService {
     public void trackUser() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
-
-        tourGuideService.tracker.stopTracking();
+        VisitedLocation visitedLocation = userService.trackUserLocation(user);
 
         assertEquals(user.getUserId(), visitedLocation.userId);
     }
@@ -93,12 +93,10 @@ public class TestTourGuideService {
     public void getNearbyAttractions() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        tourGuideService.addUser(user);
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+        userService.addUser(user);
+        VisitedLocation visitedLocation = userService.trackUserLocation(user);
 
-        List<NearbyAttraction> attractions = tourGuideService.getNearByAttractions(user.getUserName());
-
-        tourGuideService.tracker.stopTracking();
+        List<NearbyAttraction> attractions = attractionService.getNearByAttractions(user.getUserName());
 
         assertEquals(5, attractions.size());
     }
@@ -107,9 +105,7 @@ public class TestTourGuideService {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 
-        List<Provider> providers = tourGuideService.getTripDeals(user);
-
-        tourGuideService.tracker.stopTracking();
+        List<Provider> providers = userService.getTripDeals(user.getUserName());
 
         assertEquals(10, providers.size());
     }
