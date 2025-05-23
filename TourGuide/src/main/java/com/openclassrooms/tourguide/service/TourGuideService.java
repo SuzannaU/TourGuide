@@ -9,6 +9,7 @@ import com.openclassrooms.tourguide.user.UserReward;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -33,6 +34,7 @@ public class TourGuideService {
     private final RewardsService rewardsService;
     private final TripPricer tripPricer = new TripPricer();
     public final Tracker tracker;
+    public final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     boolean testMode = true;
 
     public TourGuideService(GpsUtil gpsUtil, RewardCentral rewardCentral, RewardsService rewardsService) {
@@ -53,14 +55,12 @@ public class TourGuideService {
     }
 
     public List<UserReward> getUserRewards(User user) {
-        // moved from trackUserLocation
-        //rewardsService.calculateRewards(user);
         return user.getUserRewards();
     }
 
     public VisitedLocation getUserLocation(User user) {
         VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ? user.getLastVisitedLocation()
-                :    trackUserLocation(user);
+                : trackUserLocation(user);
         return visitedLocation;
     }
 
@@ -88,10 +88,29 @@ public class TourGuideService {
     }
 
     public VisitedLocation trackUserLocation(User user) {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        //if (stackTrace.length > 0) {
+            StackTraceElement caller = stackTrace[2];
+            logger.info("Method trackUserLocation called by : {}.{} line {}", caller.getClassName(), caller.getMethodName(), caller.getLineNumber());
+        //}
         VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+        //VisitedLocation visitedLocation = new VisitedLocation(user.getUserId(), new Location(0,0), getRandomTime());
         user.addToVisitedLocations(visitedLocation);
-        rewardsService.calculateRewards(user); // move to getUserRewards
+        rewardsService.calculateRewards(user);
         return visitedLocation;
+    }
+
+    public CompletableFuture<VisitedLocation> trackUserLocation2(User user) {
+        CompletableFuture<VisitedLocation> future = CompletableFuture.supplyAsync(() -> {
+                    VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+                    user.addToVisitedLocations(visitedLocation);
+                    return visitedLocation;
+                })
+                .thenApplyAsync(visitedLocation -> {
+                    rewardsService.calculateRewards(user);
+                    return visitedLocation;
+                });
+        return future;
     }
 
     public List<NearbyAttraction> getNearByAttractions(String userName) {
@@ -126,11 +145,7 @@ public class TourGuideService {
     }
 
     private void addShutDownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                tracker.stopTracking();
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> tracker.stopTracking()));
     }
 
     /**********************************************************************************

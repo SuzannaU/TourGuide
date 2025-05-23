@@ -102,7 +102,7 @@ public class TestTourGuideService {
 
         assertEquals(5, attractions.size());
     }
-
+    // TODO try toadvise later
     public void getTripDeals() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");

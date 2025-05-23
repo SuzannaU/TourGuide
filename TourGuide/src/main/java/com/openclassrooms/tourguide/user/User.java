@@ -7,16 +7,20 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import gpsUtil.location.VisitedLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tripPricer.Provider;
 
 public class User {
+	private static final Logger logger = LoggerFactory.getLogger(User.class);
+
 	private final UUID userId;
 	private final String userName;
 	private String phoneNumber;
 	private String emailAddress;
 	private Date latestLocationTimestamp;
 	private final List<VisitedLocation> visitedLocations = new CopyOnWriteArrayList<>();
-	private final List<UserReward> userRewards = new ArrayList<>();
+	private final List<UserReward> userRewards = new CopyOnWriteArrayList<>();
 	private UserPreferences userPreferences = new UserPreferences();
 	private List<Provider> tripDeals = new ArrayList<>();
 	public User(UUID userId, String userName, String phoneNumber, String emailAddress) {
@@ -73,6 +77,7 @@ public class User {
 	public void addUserReward(UserReward userReward) {
 		if(userRewards.stream().noneMatch(r -> r.attraction.attractionName.equals(userReward.attraction.attractionName))) {
 			userRewards.add(userReward);
+			logger.info("userReward added");
 		}
 	}
 	
