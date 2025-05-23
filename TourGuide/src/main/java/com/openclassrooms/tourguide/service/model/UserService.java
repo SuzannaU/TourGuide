@@ -15,7 +15,6 @@ import tripPricer.Provider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -79,7 +78,6 @@ public class UserService {
         return rewardCentralService.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
     }
 
-    // used nowhere ?
     public List<UserReward> getUserRewards(String userName) {
         User user =  getUser(userName);
         return user.getUserRewards();

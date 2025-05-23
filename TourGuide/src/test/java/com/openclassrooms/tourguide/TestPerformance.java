@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.openclassrooms.tourguide.manager.AppManager;
 import com.openclassrooms.tourguide.manager.InternalUsersManager;
-import com.openclassrooms.tourguide.manager.TrackerManager;
 import com.openclassrooms.tourguide.service.libs.GpsUtilService;
 import com.openclassrooms.tourguide.service.model.*;
 import org.apache.commons.lang3.time.StopWatch;
@@ -56,8 +55,6 @@ public class TestPerformance {
     private GpsUtilService gpsUtilService;
     @Autowired
     private UserService userService;
-    @Autowired
-    private TrackerManager trackerManager;
 
     @BeforeAll
     public static void setUpClass() {
@@ -67,7 +64,6 @@ public class TestPerformance {
     @AfterEach
     public void afterEach() {
         InternalUsersManager.getInternalUserMap().clear();
-        trackerManager.stopTracking();
     }
 
     //@Disabled
@@ -110,7 +106,6 @@ public class TestPerformance {
             assertTrue(user.getUserRewards().size() > 0);
         }
         stopWatch.stop();
-        trackerManager.stopTracking();
 
         logger.info("highVolumeGetRewards: Time Elapsed: {} seconds.", TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));

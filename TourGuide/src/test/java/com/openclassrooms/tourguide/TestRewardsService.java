@@ -9,7 +9,6 @@ import java.util.UUID;
 
 import com.openclassrooms.tourguide.manager.AppManager;
 import com.openclassrooms.tourguide.manager.InternalUsersManager;
-import com.openclassrooms.tourguide.manager.TrackerManager;
 import com.openclassrooms.tourguide.service.libs.GpsUtilService;
 import com.openclassrooms.tourguide.service.model.LocationUtil;
 import com.openclassrooms.tourguide.service.model.UserService;
@@ -34,8 +33,6 @@ public class TestRewardsService {
     @Autowired
     private GpsUtilService gpsUtilService;
     @Autowired
-    private TrackerManager trackerManager;
-    @Autowired
     private UserService userService;
     @Autowired
     private LocationUtil locationUtil;
@@ -53,7 +50,6 @@ public class TestRewardsService {
     @AfterEach
     public void afterEach() {
         InternalUsersManager.getInternalUserMap().clear();
-        trackerManager.stopTracking();
     }
 
     @Test
