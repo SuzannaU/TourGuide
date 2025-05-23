@@ -3,7 +3,9 @@ package com.openclassrooms.tourguide.controller;
 import java.util.List;
 
 import com.openclassrooms.tourguide.model.NearbyAttraction;
+import com.openclassrooms.tourguide.model.user.User;
 import com.openclassrooms.tourguide.service.model.AttractionService;
+import com.openclassrooms.tourguide.service.model.UserRewardService;
 import com.openclassrooms.tourguide.service.model.UserService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,10 +22,12 @@ public class TourGuideController {
 
     private final AttractionService attractionService;
     private final UserService userService;
+    private final UserRewardService userRewardService;
 
-    public TourGuideController(AttractionService attractionService, UserService userService) {
+    public TourGuideController(AttractionService attractionService, UserService userService, UserRewardService userRewardService) {
         this.attractionService = attractionService;
         this.userService = userService;
+        this.userRewardService = userRewardService;
     }
 
     @RequestMapping("/")
@@ -33,36 +37,32 @@ public class TourGuideController {
     
     @RequestMapping("/getLocation") 
     public VisitedLocation getLocation(@RequestParam String userName) {
-    	return userService.getUserLocation(userName);
+    	User user = userService.getUser(userName);
+        return userService.getUserLocation(user);
     }
 
     @RequestMapping("/getVisitedLocations")
     public List<VisitedLocation> getVisitedLocations(@RequestParam String userName) {
-        return userService.getVisitedLocations(userName);
+        User user = userService.getUser(userName);
+        return userService.getVisitedLocations(user);
     }
-    
-    //  TODO: Change this method to no longer return a List of Attractions.
- 	//  Instead: Get the closest five tourist attractions to the user - no matter how far away they are.
- 	//  Return a new JSON object that contains:
-    	// Name of Tourist attraction, 
-        // Tourist attractions lat/long, 
-        // The user's location lat/long, 
-        // The distance in miles between the user's location and each of the attractions.
-        // The reward points for visiting each Attraction.
-        //    Note: Attraction reward points can be gathered from RewardsCentral
+
     @RequestMapping("/getNearbyAttractions") 
     public List<NearbyAttraction> getNearbyAttractions(@RequestParam String userName) {
-    	return attractionService.getNearByAttractions(userName);
+        User user = userService.getUser(userName);
+    	return attractionService.getNearByAttractions(user);
     }
     
     @RequestMapping("/getRewards") 
     public List<UserReward> getRewards(@RequestParam String userName) {
-    	return userService.getUserRewards(userName);
+        User user = userService.getUser(userName);
+    	return userRewardService.getUserRewards(user);
     }
        
     @RequestMapping("/getTripDeals")
     public List<Provider> getTripDeals(@RequestParam String userName) {
-    	return userService.getTripDeals(userName);
+        User user = userService.getUser(userName);
+        return userService.getTripDeals(user);
     }
 
 }

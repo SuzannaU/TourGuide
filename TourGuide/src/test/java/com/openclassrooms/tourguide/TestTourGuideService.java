@@ -96,16 +96,17 @@ public class TestTourGuideService {
         userService.addUser(user);
         VisitedLocation visitedLocation = userService.trackUserLocation(user);
 
-        List<NearbyAttraction> attractions = attractionService.getNearByAttractions(user.getUserName());
+        List<NearbyAttraction> attractions = attractionService.getNearByAttractions(user);
 
         assertEquals(5, attractions.size());
     }
-    // TODO try toadvise later
+
+    // TODO resolve test
     public void getTripDeals() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 
-        List<Provider> providers = userService.getTripDeals(user.getUserName());
+        List<Provider> providers = userService.getTripDeals(user);
 
         assertEquals(10, providers.size());
     }

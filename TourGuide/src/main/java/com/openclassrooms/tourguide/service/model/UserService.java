@@ -15,6 +15,11 @@ import tripPricer.Provider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class UserService {
@@ -24,12 +29,14 @@ public class UserService {
     private final RewardCentralService rewardCentralService;
     private final TripPricerService  tripPricerService;
     private final LocationUtil locationUtil;
+    private final UserRewardService userRewardService;
 
-    public UserService(GpsUtilService gpsUtilService, RewardCentralService rewardCentralService, TripPricerService tripPricerService, LocationUtil locationUtil) {
+    public UserService(GpsUtilService gpsUtilService, RewardCentralService rewardCentralService, TripPricerService tripPricerService, LocationUtil locationUtil, UserRewardService userRewardService) {
         this.gpsUtilService = gpsUtilService;
         this.rewardCentralService = rewardCentralService;
         this.tripPricerService = tripPricerService;
         this.locationUtil = locationUtil;
+        this.userRewardService = userRewardService;
     }
 
     public User getUser(String userName) {
@@ -46,8 +53,7 @@ public class UserService {
         }
     }
 
-    public VisitedLocation getUserLocation(String userName) {
-        User user = getUser(userName);
+    public VisitedLocation getUserLocation(User user) {
         return (user.getVisitedLocations().size() > 0)
                 ? user.getLastVisitedLocation()
                 : trackUserLocation(user);
@@ -56,35 +62,24 @@ public class UserService {
     public VisitedLocation trackUserLocation(User user) {
         VisitedLocation visitedLocation = gpsUtilService.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocation);
-        calculateRewards(user);
+        userRewardService.calculateRewards(user);
         return visitedLocation;
     }
 
-    public void calculateRewards(User user) {
-        List<VisitedLocation> userLocations = user.getVisitedLocations();
-        List<Attraction> attractions = gpsUtilService.getAttractions();
-        for (VisitedLocation visitedLocation : userLocations) {
-            for (Attraction attraction : attractions) {
-                if (user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
-                    if (locationUtil.areWithinProximityBuffer(attraction, visitedLocation)) {
-                        user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-                    }
-                }
-            }
-        }
+    public CompletableFuture<VisitedLocation> trackUserLocation2(User user) {
+        CompletableFuture<VisitedLocation> future = CompletableFuture.supplyAsync(() -> {
+                    VisitedLocation visitedLocation = gpsUtilService.getUserLocation(user.getUserId());
+                    user.addToVisitedLocations(visitedLocation);
+                    return visitedLocation;
+                })
+                .thenApplyAsync(visitedLocation -> {
+                    userRewardService.calculateRewards(user);
+                    return visitedLocation;
+                });
+        return future;
     }
 
-    private int getRewardPoints(Attraction attraction, User user) {
-        return rewardCentralService.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
-    }
-
-    public List<UserReward> getUserRewards(String userName) {
-        User user =  getUser(userName);
-        return user.getUserRewards();
-    }
-
-    public List<Provider> getTripDeals(String userName) {
-        User user =  getUser(userName);
+    public List<Provider> getTripDeals(User user) {
         int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
         List<Provider> providers = tripPricerService.getPrice(InternalUsersManager.getTripPricerServiceApiKey(), user.getUserId(),
                 user.getUserPreferences().getNumberOfAdults(), user.getUserPreferences().getNumberOfChildren(),
@@ -93,8 +88,7 @@ public class UserService {
         return providers;
     }
 
-    public List<VisitedLocation> getVisitedLocations(String userName) {
-        User user =  getUser(userName);
+    public List<VisitedLocation> getVisitedLocations(User user) {
         return user.getVisitedLocations();
     }
 }

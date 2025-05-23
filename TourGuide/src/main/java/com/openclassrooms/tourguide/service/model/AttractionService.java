@@ -1,6 +1,7 @@
 package com.openclassrooms.tourguide.service.model;
 
 import com.openclassrooms.tourguide.model.NearbyAttraction;
+import com.openclassrooms.tourguide.model.user.User;
 import com.openclassrooms.tourguide.service.libs.GpsUtilService;
 import com.openclassrooms.tourguide.service.libs.RewardCentralService;
 import gpsUtil.location.Attraction;
@@ -18,20 +19,18 @@ public class AttractionService {
 
     private final GpsUtilService gpsUtilService;
     private final RewardCentralService rewardCentralService;
-    private final UserService userService;
     private final LocationUtil locationUtil;
 
-    public AttractionService (GpsUtilService gpsUtilService,
-                              RewardCentralService rewardCentralService,
-                              UserService userService, LocationUtil locationUtil) {
+    public AttractionService(GpsUtilService gpsUtilService,
+                             RewardCentralService rewardCentralService,
+                             LocationUtil locationUtil) {
         this.gpsUtilService = gpsUtilService;
         this.rewardCentralService = rewardCentralService;
-        this.userService = userService;
         this.locationUtil = locationUtil;
     }
 
-    public List<NearbyAttraction> getNearByAttractions(String userName) {
-        VisitedLocation visitedLocation = userService.getUserLocation(userName);
+    public List<NearbyAttraction> getNearByAttractions(User user) {
+        VisitedLocation visitedLocation = gpsUtilService.getUserLocation(user.getUserId());
         Map<Attraction, Double> distances = new HashMap<>();
 
         for (Attraction attraction : gpsUtilService.getAttractions()) {
@@ -55,7 +54,7 @@ public class AttractionService {
                     visitedLocation.location.longitude,
                     sortedMap.get(attraction),
                     rewardCentralService.getAttractionRewardPoints(
-                            attraction.attractionId, userService.getUser(userName).getUserId())
+                            attraction.attractionId, user.getUserId())
             );
             nearbyAttractions.add(nearbyAttraction);
         }
