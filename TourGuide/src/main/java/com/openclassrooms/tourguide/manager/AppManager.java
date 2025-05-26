@@ -2,9 +2,14 @@ package com.openclassrooms.tourguide.manager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Component
 public class AppManager {
@@ -12,22 +17,25 @@ public class AppManager {
 
     private final InternalUsersManager internalUsersManager;
     private final TrackerManager trackerManager;
-
-    // Set this default up to 100,000 for testing
+    private final Environment environment;
     private static int internalUserNumber = 3;
-    public static boolean testMode = false;
 
-    public AppManager(InternalUsersManager internalUsersManager, TrackerManager trackerManager) {
+
+    public AppManager(InternalUsersManager internalUsersManager, TrackerManager trackerManager, Environment environment) {
         this.internalUsersManager = internalUsersManager;
         this.trackerManager = trackerManager;
+        this.environment = environment;
 
         Locale.setDefault(Locale.US);
 
-        if (testMode) {
-            logger.info("TestMode enabled");
-        } else {
+        // Check active profile to choose what to initialize
+        String[] activeProfiles = environment.getActiveProfiles();
+        if (Arrays.asList(activeProfiles).contains("test")) {
+            logger.info("Active profile: test");
+        } else if (Arrays.asList(activeProfiles).contains("dev")) {
             InternalUsersManager.initializeInternalUsers(internalUserNumber);
             trackerManager.initializeTracker();
+            logger.info("Active profile: dev");
         }
     }
 

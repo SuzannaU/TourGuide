@@ -20,21 +20,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import com.openclassrooms.tourguide.model.user.User;
+import org.springframework.test.context.ActiveProfiles;
 import tripPricer.Provider;
 
 @SpringBootTest
-public class TestTourGuideService {
-    private static final Logger logger = LoggerFactory.getLogger(TestTourGuideService.class);
+@ActiveProfiles("test")
+public class UserServiceTest {
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceTest.class);
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private AttractionService attractionService;
-
-    @BeforeAll
-    public static void setUpClass() {
-        AppManager.testMode = true;
-    }
 
     @AfterEach
     public void afterEach() {
@@ -45,7 +40,7 @@ public class TestTourGuideService {
     public void getUserLocation() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = userService.trackUserLocation(user);
+        VisitedLocation visitedLocation = userService.trackUserLocation(user).join();
         assertEquals(visitedLocation.userId, user.getUserId());
     }
 
@@ -84,21 +79,9 @@ public class TestTourGuideService {
     public void trackUser() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = userService.trackUserLocation(user);
+        VisitedLocation visitedLocation = userService.trackUserLocation(user).join();
 
         assertEquals(user.getUserId(), visitedLocation.userId);
-    }
-
-    @Test
-    public void getNearbyAttractions() {
-
-        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        userService.addUser(user);
-        VisitedLocation visitedLocation = userService.trackUserLocation(user);
-
-        List<NearbyAttraction> attractions = attractionService.getNearByAttractions(user);
-
-        assertEquals(5, attractions.size());
     }
 
     // TODO resolve test

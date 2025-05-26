@@ -26,16 +26,13 @@ public class UserService {
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final GpsUtilService gpsUtilService;
-    private final RewardCentralService rewardCentralService;
-    private final TripPricerService  tripPricerService;
-    private final LocationUtil locationUtil;
+    private final TripPricerService tripPricerService;
     private final UserRewardService userRewardService;
+    ExecutorService executorService = Executors.newCachedThreadPool();
 
-    public UserService(GpsUtilService gpsUtilService, RewardCentralService rewardCentralService, TripPricerService tripPricerService, LocationUtil locationUtil, UserRewardService userRewardService) {
+    public UserService(GpsUtilService gpsUtilService, TripPricerService tripPricerService, UserRewardService userRewardService) {
         this.gpsUtilService = gpsUtilService;
-        this.rewardCentralService = rewardCentralService;
         this.tripPricerService = tripPricerService;
-        this.locationUtil = locationUtil;
         this.userRewardService = userRewardService;
     }
 
@@ -56,27 +53,20 @@ public class UserService {
     public VisitedLocation getUserLocation(User user) {
         return (user.getVisitedLocations().size() > 0)
                 ? user.getLastVisitedLocation()
-                : trackUserLocation(user);
+                : trackUserLocation(user).join();
     }
 
-    public VisitedLocation trackUserLocation(User user) {
-        VisitedLocation visitedLocation = gpsUtilService.getUserLocation(user.getUserId());
-        user.addToVisitedLocations(visitedLocation);
-        userRewardService.calculateRewards(user);
-        return visitedLocation;
-    }
-
-    public CompletableFuture<VisitedLocation> trackUserLocation2(User user) {
-        CompletableFuture<VisitedLocation> future = CompletableFuture.supplyAsync(() -> {
+    public CompletableFuture<VisitedLocation> trackUserLocation(User user) {
+        return CompletableFuture
+                .supplyAsync(() -> {
                     VisitedLocation visitedLocation = gpsUtilService.getUserLocation(user.getUserId());
                     user.addToVisitedLocations(visitedLocation);
                     return visitedLocation;
-                })
-                .thenApplyAsync(visitedLocation -> {
-                    userRewardService.calculateRewards(user);
-                    return visitedLocation;
-                });
-        return future;
+                }, executorService)
+                .thenCompose(visitedLocation ->
+                        userRewardService.calculateRewards(user)
+                                .thenApply(v -> visitedLocation)
+                );
     }
 
     public List<Provider> getTripDeals(User user) {

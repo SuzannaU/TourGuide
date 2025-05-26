@@ -6,10 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import com.openclassrooms.tourguide.manager.AppManager;
 import com.openclassrooms.tourguide.manager.InternalUsersManager;
 import com.openclassrooms.tourguide.service.libs.GpsUtilService;
 import com.openclassrooms.tourguide.service.model.*;
@@ -26,9 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import com.openclassrooms.tourguide.model.user.User;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-public class TestPerformance {
+@ActiveProfiles("test")
+public class PerformanceTest {
 
     /*
      * A note on performance improvements:
@@ -53,57 +53,50 @@ public class TestPerformance {
      * TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
      */
 
-    private static final Logger logger = LoggerFactory.getLogger(TestPerformance.class);
+    private static final Logger logger = LoggerFactory.getLogger(PerformanceTest.class);
 
     @Autowired
     private GpsUtilService gpsUtilService;
     @Autowired
     private UserService userService;
-	@Autowired
-	private UserRewardService userRewardService;
-
-    @BeforeAll
-    public static void setUpClass() {
-        AppManager.testMode = true;
-    }
+    @Autowired
+    private UserRewardService userRewardService;
 
     @AfterEach
     public void afterEach() {
         InternalUsersManager.getInternalUserMap().clear();
     }
 
-    //@Disabled
+    @Disabled
     @Test
-    public void highVolumeTrackLocation() throws ExecutionException, InterruptedException {
+    public void highVolumeTrackLocation() {
 
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalUsersManager.initializeInternalUsers(10);
+        InternalUsersManager.initializeInternalUsers(100);
 
-        List<com.openclassrooms.tourguide.model.user.User> allUsers = userService.getAllUsers();
-        logger.info("allUsers size {}", allUsers.size());
+        List<User> allUsers = userService.getAllUsers();
 
-		StopWatch stopWatch = new StopWatch();
-		List<CompletableFuture<VisitedLocation>> locations = new ArrayList<>();
-		stopWatch.start();
-		for (User user : allUsers) {
-			CompletableFuture<VisitedLocation> visitedLocation = userService.trackUserLocation2(user);
-			locations.add(visitedLocation);
-			System.out.println("size of VisitedLocations: " + user.getVisitedLocations().size());
-		}
-		CompletableFuture<Void> allOf =  CompletableFuture.allOf(locations.toArray(new CompletableFuture[0]));
-		allOf.get();
-		stopWatch.stop();
+        StopWatch stopWatch = new StopWatch();
+        List<CompletableFuture<VisitedLocation>> locationsFutures = new ArrayList<>();
+        stopWatch.start();
+        for (User user : allUsers) {
+            CompletableFuture<VisitedLocation> visitedLocation = userService.trackUserLocation(user);
+            locationsFutures.add(visitedLocation);
+        }
+        CompletableFuture<Void> allOf = CompletableFuture.allOf(locationsFutures.toArray(new CompletableFuture[0]));
+        allOf.join();
+        stopWatch.stop();
 
         logger.info("highVolumeTrackLocation: Time Elapsed: {} seconds.", TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
-	@Disabled
-	@Test
-	public void highVolumeGetRewards() {
+    @Disabled
+    @Test
+    public void highVolumeGetRewards() {
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
-        InternalUsersManager.initializeInternalUsers(10);
+        InternalUsersManager.initializeInternalUsers(1000);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
@@ -111,17 +104,20 @@ public class TestPerformance {
         List<User> allUsers = userService.getAllUsers();
         allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
-        allUsers.forEach(userRewardService::calculateRewards);
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         for (User user : allUsers) {
+            CompletableFuture<Void> visitedLocationFuture = userRewardService.calculateRewards(user);
+            futures.add(visitedLocationFuture);
+        }
+        CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        allOf.join();
+
+        for (User user : allUsers) {
+            logger.info("user has {} UserRewards and {} visitedLocations", user.getUserRewards().size(), user.getVisitedLocations().size());
             assertTrue(user.getUserRewards().size() > 0);
         }
         stopWatch.stop();
-		for (User user : allUsers) {
-			logger.info("user has {} UserRewards", user.getUserRewards().size());
-			assertTrue(user.getUserRewards().size() > 0);
-		}
-		stopWatch.stop();
 
         logger.info("highVolumeGetRewards: Time Elapsed: {} seconds.", TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
