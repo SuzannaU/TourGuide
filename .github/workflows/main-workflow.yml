@@ -33,24 +33,28 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Install gpsUtil
-        working-directory: ./TourGuide
-        run: | 
-          mvn install:install-file -Dfile=./libs/gpsUtil.jar -DgroupId=gpsUtil -DartifactId=gpsUtil -Dversion=1.0.0 -Dpackaging=jar
-      - name: Install rewardCentral
-        run: |
-          mvn install:install-file -Dfile=./libs/RewardCentral.jar -DgroupId=rewardCentral -DartifactId=rewardCentral -Dversion=1.0.0 -Dpackaging=jar 
-      - name: Install tripPricer
-        run: |
-          mvn install:install-file -Dfile=./libs/TripPricer.jar -DgroupId=tripPricer -DartifactId=tripPricer -Dversion=1.0.0 -Dpackaging=jar
-      - name: code compile
-        run: mvn compile
+      #- name: Install gpsUtil
+        #working-directory: ./TourGuide
+        #run: | 
+          #mvn install:install-file -Dfile=./libs/gpsUtil.jar -DgroupId=gpsUtil -DartifactId=gpsUtil -Dversion=1.0.0 -Dpackaging=jar
+      #- name: Install rewardCentral
+        #run: |
+         # mvn install:install-file -Dfile=./libs/RewardCentral.jar -DgroupId=rewardCentral -DartifactId=rewardCentral -Dversion=1.0.0 -Dpackaging=jar 
+      #- name: Install tripPricer
+       # run: |
+         # mvn install:install-file -Dfile=./libs/TripPricer.jar -DgroupId=tripPricer -DartifactId=tripPricer -Dversion=1.0.0 -Dpackaging=jar
+      #- name: code compile
+        #run: mvn compile
 
   test:
     name: unit tests
-    needs: build
+    #needs: build
     runs-on: windows-latest
     steps:
+      - name: Check current directory
+        run: |
+          echo "Current directory: $(pwd)"
+          dir
       - name: run tests
         timeout-minutes: 21
         run: mvn test
