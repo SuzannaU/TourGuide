@@ -57,10 +57,10 @@ jobs:
     name: unit tests
     needs: build
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./TourGuide
+    #defaults:
+      #run:
+        #shell: bash
+        #working-directory: ./TourGuide
     steps:
       - name: Check current directory
         run: |
@@ -68,7 +68,9 @@ jobs:
           dir
       - name: run tests
         timeout-minutes: 21
-        run: mvn test
+        run: |
+          cd TourGuide
+          mvn test
       - name: failed-tests
         if: ${{failure()}}
         run: echo Tests have failed
