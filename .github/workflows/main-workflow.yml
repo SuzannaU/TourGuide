@@ -50,50 +50,6 @@ jobs:
       - name: Install tripPricer
         run: |
           mvn install:install-file -Dfile=./libs/TripPricer.jar -DgroupId=tripPricer -DartifactId=tripPricer -Dversion=1.0.0 -Dpackaging=jar
-      - name: code compile
-        run: mvn compile
-
-  test:
-    name: unit tests
-    needs: build
-    runs-on: windows-latest
-    #defaults:
-      #run:
-        #shell: bash
-        #working-directory: ./TourGuide
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Check current directory
+      - name: code package
         run: |
-          echo "Current directory: $(pwd)"
-          dir
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - name: run tests
-        timeout-minutes: 21
-        run: |
-          cd TourGuide
-          mvn test
-      - name: failed-tests
-        if: ${{failure()}}
-        run: echo Tests have failed
-
-  quality:
-    name: quality testing
-    needs: test
-    runs-on: windows-latest
-    steps:
-      - name: sonarqube
-        run: echo Quality is all!
-
-  package:
-    name: package
-    needs: test
-    runs-on: windows-latest
-    steps:
-      - name: Generate JAR file
-        run: mvn -B package --file pom.xml
+          mvn -B package --file pom.xml
