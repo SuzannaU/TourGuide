@@ -20,6 +20,8 @@ jobs:
     name: build
     runs-on: windows-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Check current directory
         run: |
           echo "Current directory: $(pwd)"
