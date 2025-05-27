@@ -57,6 +57,10 @@ jobs:
     name: unit tests
     needs: build
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./TourGuide
     steps:
       - name: Check current directory
         run: |
