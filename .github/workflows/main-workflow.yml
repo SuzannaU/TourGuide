@@ -22,6 +22,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Cache local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Check current directory
         run: |
           echo "Current directory: $(pwd)"
@@ -33,22 +40,22 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      #- name: Install gpsUtil
-        #working-directory: ./TourGuide
-        #run: | 
-          #mvn install:install-file -Dfile=./libs/gpsUtil.jar -DgroupId=gpsUtil -DartifactId=gpsUtil -Dversion=1.0.0 -Dpackaging=jar
-      #- name: Install rewardCentral
-        #run: |
-         # mvn install:install-file -Dfile=./libs/RewardCentral.jar -DgroupId=rewardCentral -DartifactId=rewardCentral -Dversion=1.0.0 -Dpackaging=jar 
-      #- name: Install tripPricer
-       # run: |
-         # mvn install:install-file -Dfile=./libs/TripPricer.jar -DgroupId=tripPricer -DartifactId=tripPricer -Dversion=1.0.0 -Dpackaging=jar
-      #- name: code compile
-        #run: mvn compile
+      - name: Install gpsUtil
+        working-directory: ./TourGuide
+        run: | 
+          mvn install:install-file -Dfile=./libs/gpsUtil.jar -DgroupId=gpsUtil -DartifactId=gpsUtil -Dversion=1.0.0 -Dpackaging=jar
+      - name: Install rewardCentral
+        run: |
+          mvn install:install-file -Dfile=./libs/RewardCentral.jar -DgroupId=rewardCentral -DartifactId=rewardCentral -Dversion=1.0.0 -Dpackaging=jar 
+      - name: Install tripPricer
+        run: |
+          mvn install:install-file -Dfile=./libs/TripPricer.jar -DgroupId=tripPricer -DartifactId=tripPricer -Dversion=1.0.0 -Dpackaging=jar
+      - name: code compile
+        run: mvn compile
 
   test:
     name: unit tests
-    #needs: build
+    needs: build
     runs-on: windows-latest
     steps:
       - name: Check current directory
