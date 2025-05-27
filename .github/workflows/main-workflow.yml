@@ -30,7 +30,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: run tests
-      - timeout-minutes: 21
+        timeout-minutes: 21
         run: mvn test
       - name: failed-tests
         if: ${{failure()}}
