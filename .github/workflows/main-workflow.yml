@@ -60,7 +60,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./TourGuide
+        #working-directory: ./TourGuide
     steps:
       - name: Check current directory
         run: |
