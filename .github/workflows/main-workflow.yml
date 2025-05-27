@@ -20,6 +20,10 @@ jobs:
     name: build
     runs-on: windows-latest
     steps:
+      - name: Check current directory
+        run: |
+          echo "Current directory: $(pwd)"
+          dir
       - name: code compile
         run: mvn compile
 
