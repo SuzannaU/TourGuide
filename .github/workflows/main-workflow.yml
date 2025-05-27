@@ -1,0 +1,53 @@
+name: TourGuide CI with Maven
+
+on:
+  push:
+    branches:
+      - main
+      - ci-tests
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: pwsh
+    working-directory: /TourGuide
+
+jobs:
+  build:
+    name: build
+    runs-on: windows-latest
+    steps:
+      - name: code compile
+        run: mvn compile
+
+  test:
+    name: unit tests
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - name: run tests
+      - timeout-minutes: 21
+        run: mvn test
+      - name: failed-tests
+        if: ${{failure()}}
+        run: echo Tests have failed
+
+  quality:
+    name: quality testing
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - name: sonarqube
+        run: echo Quality is all!
+
+  package:
+    name: package
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - name: Generate JAR file
+        run: mvn -B package --file pom.xml
