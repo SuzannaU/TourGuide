@@ -14,7 +14,6 @@ permissions:
 defaults:
   run:
     shell: pwsh
-    working-directory: /TourGuide
 
 jobs:
   build:
