@@ -11,15 +11,14 @@ on:
 permissions:
   contents: read
 
-defaults:
-  run:
-    shell: bash
-    working-directory: ./TourGuide
-
 jobs:
   build:
     name: build
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./TourGuide
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,6 +34,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Install gpsUtil
+        working-directory: ./TourGuide
         run: | 
           mvn install:install-file -Dfile=./libs/gpsUtil.jar -DgroupId=gpsUtil -DartifactId=gpsUtil -Dversion=1.0.0 -Dpackaging=jar
       - name: Install rewardCentral
