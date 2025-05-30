@@ -6,12 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.UUID;
 
-import com.openclassrooms.tourguide.manager.AppManager;
 import com.openclassrooms.tourguide.manager.InternalUsersManager;
-import com.openclassrooms.tourguide.model.NearbyAttraction;
 import com.openclassrooms.tourguide.service.model.*;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import gpsUtil.location.VisitedLocation;

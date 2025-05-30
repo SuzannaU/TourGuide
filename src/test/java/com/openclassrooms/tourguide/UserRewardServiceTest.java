@@ -42,6 +42,7 @@ public class UserRewardServiceTest {
     @BeforeEach
     public void beforeEach() {
         locationUtil.setProximityBuffer(locationUtil.getDefaultProximityBuffer());
+        InternalUsersManager.getInternalUserMap().clear();
     }
 
     @AfterEach

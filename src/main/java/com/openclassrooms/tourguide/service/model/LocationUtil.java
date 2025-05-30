@@ -13,8 +13,8 @@ public class LocationUtil {
     private static final double STATUTE_MILES_PER_NAUTICAL_MILE = 1.15077945;
 
     // proximity in miles
-    private final int defaultProximityBuffer = 10;
-    private int proximityBuffer = defaultProximityBuffer;
+    private static final int DEFAULT_PROXIMITY_BUFFER = 10;
+    private int proximityBuffer = DEFAULT_PROXIMITY_BUFFER;
     private int attractionProximityRange = 200;
 
     public void setProximityBuffer(int proximityBuffer) {
@@ -26,7 +26,7 @@ public class LocationUtil {
     }
 
     public int getDefaultProximityBuffer() {
-        return defaultProximityBuffer;
+        return DEFAULT_PROXIMITY_BUFFER;
     }
 
     // no longer useful

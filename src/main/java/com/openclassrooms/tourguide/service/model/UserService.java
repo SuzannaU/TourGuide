@@ -2,11 +2,8 @@ package com.openclassrooms.tourguide.service.model;
 
 import com.openclassrooms.tourguide.manager.InternalUsersManager;
 import com.openclassrooms.tourguide.model.user.User;
-import com.openclassrooms.tourguide.model.user.UserReward;
 import com.openclassrooms.tourguide.service.libs.GpsUtilService;
-import com.openclassrooms.tourguide.service.libs.RewardCentralService;
 import com.openclassrooms.tourguide.service.libs.TripPricerService;
-import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +12,7 @@ import tripPricer.Provider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,7 +46,7 @@ public class UserService {
     }
 
     public VisitedLocation getUserLocation(User user) {
-        return (user.getVisitedLocations().size() > 0)
+        return (!user.getVisitedLocations().isEmpty())
                 ? user.getLastVisitedLocation()
                 : trackUserLocation(user).join();
     }

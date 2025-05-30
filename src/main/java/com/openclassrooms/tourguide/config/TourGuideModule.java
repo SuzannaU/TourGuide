@@ -7,6 +7,9 @@ import gpsUtil.GpsUtil;
 import rewardCentral.RewardCentral;
 import tripPricer.TripPricer;
 
+/**
+ * This configuration class provides Beans of external libraries needed for the project.
+ */
 @Configuration
 public class TourGuideModule {
 

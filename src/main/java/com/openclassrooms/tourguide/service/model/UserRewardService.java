@@ -28,20 +28,6 @@ public class UserRewardService {
         this.locationUtil = locationUtil;
     }
 
-    public void calculateRewardsOld(User user) {
-        List<VisitedLocation> userLocations = user.getVisitedLocations();
-        List<Attraction> attractions = gpsUtilService.getAttractions();
-        for (VisitedLocation visitedLocation : userLocations) {
-            for (Attraction attraction : attractions) {
-                if (user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
-                    if (locationUtil.areWithinProximityBuffer(attraction, visitedLocation)) {
-                        user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-                    }
-                }
-            }
-        }
-    }
-
     public CompletableFuture<Void> calculateRewards(User user) {
         List<VisitedLocation> userLocations = user.getVisitedLocations();
         CompletableFuture<List<Attraction>> attractionsFuture = CompletableFuture.supplyAsync(gpsUtilService::getAttractions, executorService);
@@ -54,9 +40,8 @@ public class UserRewardService {
                         if (locationUtil.areWithinProximityBuffer(attraction, location)) {
                             CompletableFuture<Void> rewardTask = CompletableFuture
                                     .supplyAsync(() -> getRewardPoints(attraction, user), executorService)
-                                    .thenAccept(points -> {
-                                        user.addUserReward(new UserReward(location, attraction, points));
-                                    });
+                                    .thenAccept(points ->
+                                        user.addUserReward(new UserReward(location, attraction, points)));
                             rewardTasks.add(rewardTask);
                         }
                     }

@@ -25,21 +25,15 @@ public class TrackerManager {
     }
 
     void addShutDownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                stop = true;
-                executorService.shutdownNow();
-                logger.info("Tracker stopped");
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            stop = true;
+            executorService.shutdownNow();
+            logger.info("Tracker stopped");
+        }));
     }
 
     public void stopTracking() {
         stop = true;
         executorService.shutdownNow();
-    }
-
-    public static boolean isTrackerStopped() {
-        return stop;
     }
 }

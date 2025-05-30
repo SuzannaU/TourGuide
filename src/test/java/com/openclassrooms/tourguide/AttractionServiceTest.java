@@ -37,7 +37,7 @@ public class AttractionServiceTest {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         userService.addUser(user);
-        VisitedLocation visitedLocation = userService.trackUserLocation(user).join();
+        userService.trackUserLocation(user).join();
 
         List<NearbyAttraction> attractions = attractionService.getNearByAttractions(user);
 

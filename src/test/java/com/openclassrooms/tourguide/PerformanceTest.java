@@ -1,5 +1,6 @@
 package com.openclassrooms.tourguide;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -13,7 +14,6 @@ import com.openclassrooms.tourguide.service.libs.GpsUtilService;
 import com.openclassrooms.tourguide.service.model.*;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -87,8 +87,8 @@ public class PerformanceTest {
         allOf.join();
         stopWatch.stop();
 
-        logger.info("highVolumeTrackLocation: Time Elapsed: {} seconds.", TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
-        assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
+        logger.info("highVolumeTrackLocation: Time Elapsed: {} seconds.", stopWatch.getDuration().toSeconds());
+        assertTrue(stopWatch.getDuration().toMinutes() <= 15);
     }
 
     @Disabled
@@ -115,11 +115,11 @@ public class PerformanceTest {
 
         for (User user : allUsers) {
             logger.info("user has {} UserRewards and {} visitedLocations", user.getUserRewards().size(), user.getVisitedLocations().size());
-            assertTrue(user.getUserRewards().size() > 0);
+            assertFalse(user.getUserRewards().isEmpty());
         }
         stopWatch.stop();
 
-        logger.info("highVolumeGetRewards: Time Elapsed: {} seconds.", TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
-        assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
+        logger.info("highVolumeGetRewards: Time Elapsed: {} seconds.", stopWatch.getDuration().toSeconds());
+        assertTrue(stopWatch.getDuration().toMinutes() <= 20);
     }
 }

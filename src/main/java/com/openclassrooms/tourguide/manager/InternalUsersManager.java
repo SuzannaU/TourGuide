@@ -16,15 +16,9 @@ import java.util.stream.IntStream;
 public class InternalUsersManager {
     private static final Logger logger = LoggerFactory.getLogger(InternalUsersManager.class);
 
-    private static final String tripPricerServiceApiKey = "test-server-api-key";
+    private static final String TRIP_PRICER_SERVICE_API_KEY = "test-server-api-key";
     private static final Map<String, User> internalUserMap = new HashMap<>();
-    private static boolean usersInitializationDone = false;
 
-    public InternalUsersManager() {}
-
-    public static boolean getUsersInitializationDone() {
-        return usersInitializationDone;
-    }
     /**********************************************************************************
      *
      * Methods Below: For Internal Testing
@@ -38,7 +32,7 @@ public class InternalUsersManager {
     }
 
     public static String getTripPricerServiceApiKey() {
-        return tripPricerServiceApiKey;
+        return TRIP_PRICER_SERVICE_API_KEY;
     }
 
     public static void initializeInternalUsers(int userNumber) {
@@ -52,15 +46,14 @@ public class InternalUsersManager {
 
             internalUserMap.put(userName, user);
         });
-        usersInitializationDone = true;
         logger.debug("Created {} internal test users.", userNumber);
     }
 
     private static void generateUserLocationHistory(User user) {
-        IntStream.range(0, 3).forEach(i -> {
+        IntStream.range(0, 3).forEach(i ->
             user.addToVisitedLocations(new VisitedLocation(user.getUserId(),
-                    new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
-        });
+                    new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()))
+        );
     }
 
     private static double generateRandomLongitude() {
