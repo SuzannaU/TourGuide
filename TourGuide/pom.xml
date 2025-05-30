@@ -31,7 +31,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -59,13 +58,11 @@
             <artifactId>gpsUtil</artifactId>
             <version>1.0.0</version>
         </dependency>
-
         <dependency>
             <groupId>tripPricer</groupId>
             <artifactId>tripPricer</artifactId>
             <version>1.0.0</version>
         </dependency>
-
         <dependency>
             <groupId>rewardCentral</groupId>
             <artifactId>rewardCentral</artifactId>
@@ -129,5 +126,34 @@
             </plugin>
         </plugins>
     </reporting>
+    <profiles>
+        <profile>
+            <id>no-tests</id>
+            <properties>
+                    <maven.test.skip>true</maven.test.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <spring-boot.run.arguments>--spring.profiles.active=prod</spring-boot.run.arguments>
+            </properties>
+        </profile>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                    <spring-boot.run.arguments>--spring.profiles.active=dev</spring-boot.run.arguments>
+            </properties>
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <spring-boot.run.arguments>--spring.profiles.active=test</spring-boot.run.arguments>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>
