@@ -6,3 +6,5 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 /.idea/
+**/.idea/
+.idea/**
