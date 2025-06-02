@@ -11,9 +11,7 @@ import com.openclassrooms.tourguide.service.libs.GpsUtilService;
 import com.openclassrooms.tourguide.service.model.LocationUtil;
 import com.openclassrooms.tourguide.service.model.UserRewardService;
 import com.openclassrooms.tourguide.service.model.UserService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
@@ -62,9 +60,10 @@ public class UserRewardServiceTest {
     public void getUserRewardsTest() {
         locationUtil.setProximityBuffer(Integer.MAX_VALUE);
         InternalUsersManager.initializeInternalUsers(1);
+        User user = userService.getAllUsers().get(0);
 
-        userRewardService.calculateRewards(userService.getAllUsers().get(0)).join();
-        List<UserReward> userRewards = userRewardService.getUserRewards(userService.getAllUsers().get(0));
+        userRewardService.calculateRewards(user).join();
+        List<UserReward> userRewards = userRewardService.getUserRewards(user);
 
         assertEquals(gpsUtilService.getAttractions().size(), userRewards.size());
     }
