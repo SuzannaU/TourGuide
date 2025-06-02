@@ -15,7 +15,6 @@ public class LocationUtil {
     // proximity in miles
     private static final int DEFAULT_PROXIMITY_BUFFER = 10;
     private int proximityBuffer = DEFAULT_PROXIMITY_BUFFER;
-    private int attractionProximityRange = 200;
 
     public void setProximityBuffer(int proximityBuffer) {
         this.proximityBuffer = proximityBuffer;
@@ -27,11 +26,6 @@ public class LocationUtil {
 
     public int getDefaultProximityBuffer() {
         return DEFAULT_PROXIMITY_BUFFER;
-    }
-
-    // no longer useful
-    public boolean areWithinProximityRange(Attraction attraction, Location location) {
-        return (getDistance(attraction, location) < attractionProximityRange);
     }
 
     public boolean areWithinProximityBuffer(Attraction attraction, VisitedLocation visitedLocation) {
@@ -51,5 +45,4 @@ public class LocationUtil {
         double statuteMiles = STATUTE_MILES_PER_NAUTICAL_MILE * nauticalMiles;
         return statuteMiles;
     }
-
 }

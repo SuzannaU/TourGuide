@@ -5,6 +5,7 @@ import com.openclassrooms.tourguide.model.user.User;
 import com.openclassrooms.tourguide.service.libs.GpsUtilService;
 import com.openclassrooms.tourguide.service.libs.RewardCentralService;
 import gpsUtil.location.Attraction;
+import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,29 +30,33 @@ public class AttractionService {
         this.locationUtil = locationUtil;
     }
 
-    public List<NearbyAttraction> getNearByAttractions(User user) {
-        VisitedLocation visitedLocation = gpsUtilService.getUserLocation(user.getUserId());
+    public List<NearbyAttraction> getNearbyAttractions(User user) {
+        Location userLocation = gpsUtilService.getUserLocation(user.getUserId()).location;
         Map<Attraction, Double> distances = new HashMap<>();
 
         for (Attraction attraction : gpsUtilService.getAttractions()) {
-            double distance = locationUtil.getDistance(visitedLocation.location, attraction);
+            double distance = locationUtil.getDistance(userLocation, attraction);
             distances.put(attraction, distance);
         }
 
         Map<Attraction, Double> sortedMap = distances.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())
                 .limit(5)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new));
 
         List<NearbyAttraction> nearbyAttractions = new ArrayList<>();
-        Set<Attraction> attractions = sortedMap.keySet();
-        for (Attraction attraction : attractions) {
+        Set<Attraction> sortedAttractions = sortedMap.keySet();
+        for (Attraction attraction : sortedAttractions) {
             NearbyAttraction nearbyAttraction = new NearbyAttraction(
                     attraction.attractionName,
                     attraction.latitude,
                     attraction.longitude,
-                    visitedLocation.location.latitude,
-                    visitedLocation.location.longitude,
+                    userLocation.latitude,
+                    userLocation.longitude,
                     sortedMap.get(attraction),
                     rewardCentralService.getAttractionRewardPoints(
                             attraction.attractionId, user.getUserId())

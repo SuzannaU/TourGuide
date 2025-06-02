@@ -45,29 +45,21 @@ public class UserRewardServiceTest {
         InternalUsersManager.getInternalUserMap().clear();
     }
 
-    @AfterEach
-    public void afterEach() {
-        InternalUsersManager.getInternalUserMap().clear();
-    }
-
     @Test
-    public void userGetRewards() {
-
-        InternalUsersManager.initializeInternalUsers(5);
+    public void calculateRewardsTest() {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         Attraction attraction = gpsUtilService.getAttractions().get(0);
         user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
 
-        userService.trackUserLocation(user).join();
-
+        userRewardService.calculateRewards(user).join();
         List<UserReward> userRewards = user.getUserRewards();
 
         assertEquals(1, userRewards.size());
     }
 
     @Test
-    public void nearAllAttractions() {
+    public void getUserRewardsTest() {
         locationUtil.setProximityBuffer(Integer.MAX_VALUE);
         InternalUsersManager.initializeInternalUsers(1);
 

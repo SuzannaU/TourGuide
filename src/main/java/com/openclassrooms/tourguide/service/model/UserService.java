@@ -42,6 +42,8 @@ public class UserService {
     public void addUser(User user) {
         if (!InternalUsersManager.getInternalUserMap().containsKey(user.getUserName())) {
             InternalUsersManager.getInternalUserMap().put(user.getUserName(), user);
+        } else {
+            logger.debug("User {} already exists", user.getUserName());
         }
     }
 

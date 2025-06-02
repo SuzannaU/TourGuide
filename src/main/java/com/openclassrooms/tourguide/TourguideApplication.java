@@ -11,6 +11,5 @@ public class TourguideApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(TourguideApplication.class, args);
-        logger.info("TourGuideApplication started ");
     }
 }

@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class Tracker implements Runnable {
     private final Logger logger = LoggerFactory.getLogger(Tracker.class);
-    private static final long TRACKING_POLLING_INTERVAL = TimeUnit.MINUTES.toSeconds(5);
     private final UserService userService;
+    private static final long TRACKING_POLLING_INTERVAL = TimeUnit.MINUTES.toSeconds(5);
 
     public Tracker(UserService UserService) {
         this.userService = UserService;
