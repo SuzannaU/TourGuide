@@ -1,4 +1,4 @@
-package com.openclassrooms.tourguide;
+package com.openclassrooms.tourguide.service;
 
 import com.openclassrooms.tourguide.service.model.LocationUtil;
 import gpsUtil.location.Attraction;

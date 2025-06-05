@@ -1,4 +1,4 @@
-package com.openclassrooms.tourguide;
+package com.openclassrooms.tourguide.service;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +29,7 @@ public class UserServiceTest {
 
     @BeforeEach
     public void beforeEach() {
-        InternalUsersManager.getInternalUserMap().clear();
+        InternalUsersManager.getInternalUsersMap().clear();
     }
 
     @Test

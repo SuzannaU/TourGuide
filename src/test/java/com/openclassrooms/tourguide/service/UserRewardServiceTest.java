@@ -1,4 +1,4 @@
-package com.openclassrooms.tourguide;
+package com.openclassrooms.tourguide.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -40,7 +40,7 @@ public class UserRewardServiceTest {
     @BeforeEach
     public void beforeEach() {
         locationUtil.setProximityBuffer(locationUtil.getDefaultProximityBuffer());
-        InternalUsersManager.getInternalUserMap().clear();
+        InternalUsersManager.getInternalUsersMap().clear();
     }
 
     @Test

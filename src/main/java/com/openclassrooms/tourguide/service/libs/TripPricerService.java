@@ -18,8 +18,8 @@ public class TripPricerService {
         this.tripPricer = tripPricer;
     }
 
-    public List<Provider> getPrice(String apiKey, UUID attractionId, int adults, int children, int nightsStay, int rewardsPoints) {
-        return tripPricer.getPrice(apiKey, attractionId, adults, children, nightsStay, rewardsPoints);
+    public List<Provider> getPrice(String apiKey, UUID attractionId, int adults, int children, int nightsStay, int rewardPoints) {
+        return tripPricer.getPrice(apiKey, attractionId, adults, children, nightsStay, rewardPoints);
     }
 
     public String getProviderName(String apiKey, int adults) {

@@ -1,4 +1,4 @@
-package com.openclassrooms.tourguide;
+package com.openclassrooms.tourguide.service;
 
 import com.openclassrooms.tourguide.manager.InternalUsersManager;
 import com.openclassrooms.tourguide.model.NearbyAttraction;
@@ -29,7 +29,7 @@ public class AttractionServiceTest {
 
     @BeforeEach
     public void beforeEach() {
-        InternalUsersManager.getInternalUserMap().clear();
+        InternalUsersManager.getInternalUsersMap().clear();
     }
 
     @Test

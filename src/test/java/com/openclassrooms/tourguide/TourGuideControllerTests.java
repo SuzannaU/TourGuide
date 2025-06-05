@@ -106,7 +106,7 @@ public class TourGuideControllerTests {
     @Test
     public void getRewardsTest() throws Exception {
         Attraction attraction = new Attraction("name", "city", "state", 1.0, 1.0);
-        UserReward userReward = new UserReward(visitedLocation, attraction);
+        UserReward userReward = new UserReward(visitedLocation, attraction, 1);
         List<UserReward> userRewards = List.of(userReward);
         when(userService.getUser(anyString())).thenReturn(user);
         when(userRewardService.getUserRewards(any(User.class))).thenReturn(userRewards);

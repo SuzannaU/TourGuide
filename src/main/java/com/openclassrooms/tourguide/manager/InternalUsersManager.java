@@ -17,7 +17,7 @@ public class InternalUsersManager {
     private static final Logger logger = LoggerFactory.getLogger(InternalUsersManager.class);
 
     private static final String TRIP_PRICER_SERVICE_API_KEY = "test-server-api-key";
-    private static final Map<String, User> internalUserMap = new HashMap<>();
+    private static final Map<String, User> INTERNAL_USERS_MAP = new HashMap<>();
 
     /**********************************************************************************
      *
@@ -27,8 +27,8 @@ public class InternalUsersManager {
     // Database connection will be used for external users, but for testing purposes
     // internal users are provided and stored in memory
 
-    public static Map<String, User> getInternalUserMap(){
-        return internalUserMap;
+    public static Map<String, User> getInternalUsersMap(){
+        return INTERNAL_USERS_MAP;
     }
 
     public static String getTripPricerServiceApiKey() {
@@ -44,7 +44,7 @@ public class InternalUsersManager {
             User user = new User(UUID.randomUUID(), userName, phone, email);
             generateUserLocationHistory(user);
 
-            internalUserMap.put(userName, user);
+            INTERNAL_USERS_MAP.put(userName, user);
         });
         logger.debug("Created {} internal test users.", userNumber);
     }

@@ -27,7 +27,7 @@ public class TrackerTest {
 
     @BeforeEach
     public void beforeEach(){
-        InternalUsersManager.getInternalUserMap().clear();
+        InternalUsersManager.getInternalUsersMap().clear();
         trackerThread = new Thread(tracker);
     }
 

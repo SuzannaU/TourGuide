@@ -10,7 +10,6 @@ public class NearbyAttraction {
     private double distance;
     private int rewardPoints;
 
-
     public NearbyAttraction(String name, double latitude, double longitude, double userLatitude, double userLongitude, double distance, int rewardPoints) {
         this.name = name;
         this.latitude = latitude;

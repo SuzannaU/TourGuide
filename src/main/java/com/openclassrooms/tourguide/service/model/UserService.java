@@ -2,6 +2,7 @@ package com.openclassrooms.tourguide.service.model;
 
 import com.openclassrooms.tourguide.manager.InternalUsersManager;
 import com.openclassrooms.tourguide.model.user.User;
+import com.openclassrooms.tourguide.model.user.UserReward;
 import com.openclassrooms.tourguide.service.libs.GpsUtilService;
 import com.openclassrooms.tourguide.service.libs.TripPricerService;
 import gpsUtil.location.VisitedLocation;
@@ -13,8 +14,8 @@ import tripPricer.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import static com.openclassrooms.tourguide.manager.AppManager.EXECUTOR_SERVICE;
 
 @Service
 public class UserService {
@@ -23,28 +24,11 @@ public class UserService {
     private final GpsUtilService gpsUtilService;
     private final TripPricerService tripPricerService;
     private final UserRewardService userRewardService;
-    ExecutorService executorService = Executors.newCachedThreadPool();
 
     public UserService(GpsUtilService gpsUtilService, TripPricerService tripPricerService, UserRewardService userRewardService) {
         this.gpsUtilService = gpsUtilService;
         this.tripPricerService = tripPricerService;
         this.userRewardService = userRewardService;
-    }
-
-    public User getUser(String userName) {
-        return InternalUsersManager.getInternalUserMap().get(userName);
-    }
-
-    public List<User> getAllUsers() {
-        return new ArrayList<>(InternalUsersManager.getInternalUserMap().values());
-    }
-
-    public void addUser(User user) {
-        if (!InternalUsersManager.getInternalUserMap().containsKey(user.getUserName())) {
-            InternalUsersManager.getInternalUserMap().put(user.getUserName(), user);
-        } else {
-            logger.debug("User {} already exists", user.getUserName());
-        }
     }
 
     public VisitedLocation getUserLocation(User user) {
@@ -59,7 +43,7 @@ public class UserService {
                     VisitedLocation visitedLocation = gpsUtilService.getUserLocation(user.getUserId());
                     user.addToVisitedLocations(visitedLocation);
                     return visitedLocation;
-                }, executorService)
+                }, EXECUTOR_SERVICE)
                 .thenCompose(visitedLocation ->
                         userRewardService.calculateRewards(user)
                                 .thenApply(v -> visitedLocation)
@@ -67,12 +51,28 @@ public class UserService {
     }
 
     public List<Provider> getTripDeals(User user) {
-        int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
+        int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
         List<Provider> providers = tripPricerService.getPrice(InternalUsersManager.getTripPricerServiceApiKey(), user.getUserId(),
                 user.getUserPreferences().getNumberOfAdults(), user.getUserPreferences().getNumberOfChildren(),
                 user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
         user.setTripDeals(providers);
         return providers;
+    }
+
+    public void addUser(User user) {
+        if (!InternalUsersManager.getInternalUsersMap().containsKey(user.getUserName())) {
+            InternalUsersManager.getInternalUsersMap().put(user.getUserName(), user);
+        } else {
+            logger.debug("User {} already exists", user.getUserName());
+        }
+    }
+
+    public User getUser(String userName) {
+        return InternalUsersManager.getInternalUsersMap().get(userName);
+    }
+
+    public List<User> getAllUsers() {
+        return new ArrayList<>(InternalUsersManager.getInternalUsersMap().values());
     }
 
     public List<VisitedLocation> getVisitedLocations(User user) {
