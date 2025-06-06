@@ -15,8 +15,6 @@ import org.junit.jupiter.api.*;
 
 import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import com.openclassrooms.tourguide.model.user.User;
@@ -26,7 +24,6 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 @ActiveProfiles("test")
 public class UserRewardServiceTest {
-    private static final Logger logger = LoggerFactory.getLogger(UserRewardServiceTest.class);
 
     @Autowired
     private GpsUtilService gpsUtilService;

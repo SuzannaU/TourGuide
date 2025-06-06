@@ -6,29 +6,36 @@ import com.openclassrooms.tourguide.service.libs.GpsUtilService;
 import com.openclassrooms.tourguide.service.libs.RewardCentralService;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Provides methods related to NearbyAttraction model object.
+ *
+ * @see NearbyAttraction
+ */
 @Service
-public class AttractionService {
-    private final Logger logger = LoggerFactory.getLogger(AttractionService.class);
+public class NearbyAttractionService {
 
     private final GpsUtilService gpsUtilService;
     private final RewardCentralService rewardCentralService;
     private final LocationUtil locationUtil;
 
-    public AttractionService(GpsUtilService gpsUtilService,
-                             RewardCentralService rewardCentralService,
-                             LocationUtil locationUtil) {
+    public NearbyAttractionService(GpsUtilService gpsUtilService,
+                                   RewardCentralService rewardCentralService,
+                                   LocationUtil locationUtil) {
         this.gpsUtilService = gpsUtilService;
         this.rewardCentralService = rewardCentralService;
         this.locationUtil = locationUtil;
     }
 
+    /**
+     * Used to fetch the 5 closest attractions regarding the current location of the user, no matter how far they are
+     * @param user
+     * @return a list of 5 NearbyAttraction
+     */
     public List<NearbyAttraction> getNearbyAttractions(User user) {
         Location userLocation = gpsUtilService.getUserLocation(user.getUserId()).location;
         Map<Attraction, Double> distances = new HashMap<>();

@@ -7,12 +7,9 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import gpsUtil.location.VisitedLocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tripPricer.Provider;
 
 public class User {
-    private static final Logger logger = LoggerFactory.getLogger(User.class);
 
     private final UUID userId;
     private final String userName;

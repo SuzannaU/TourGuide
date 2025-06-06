@@ -12,29 +12,23 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.IntStream;
 
+/**
+ * Handles initialization of internal users needed for the developing phase of the application.
+ * Database connection will be used for external users.
+ * Internal Users initialization only happens in dev profile, or if called from testing
+ *
+ * @see AppManager
+ */
 @Component
 public class InternalUsersManager {
     private static final Logger logger = LoggerFactory.getLogger(InternalUsersManager.class);
-
-    private static final String TRIP_PRICER_SERVICE_API_KEY = "test-server-api-key";
     private static final Map<String, User> INTERNAL_USERS_MAP = new HashMap<>();
 
-    /**********************************************************************************
+    /**
+     * Creates internal users and put them in a Map with their userName as Key.
      *
-     * Methods Below: For Internal Testing
-     *
-     **********************************************************************************/
-    // Database connection will be used for external users, but for testing purposes
-    // internal users are provided and stored in memory
-
-    public static Map<String, User> getInternalUsersMap(){
-        return INTERNAL_USERS_MAP;
-    }
-
-    public static String getTripPricerServiceApiKey() {
-        return TRIP_PRICER_SERVICE_API_KEY;
-    }
-
+     * @param userNumber the number of users to be created
+     */
     public static void initializeInternalUsers(int userNumber) {
         logger.info("Initializing users");
         IntStream.range(0, userNumber).forEach(i -> {
@@ -71,5 +65,9 @@ public class InternalUsersManager {
     private static Date getRandomTime() {
         LocalDateTime localDateTime = LocalDateTime.now().minusDays(new Random().nextInt(30));
         return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
+    }
+
+    public static Map<String, User> getInternalUsersMap(){
+        return INTERNAL_USERS_MAP;
     }
 }

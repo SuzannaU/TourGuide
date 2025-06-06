@@ -4,7 +4,7 @@ import com.openclassrooms.tourguide.controller.TourGuideController;
 import com.openclassrooms.tourguide.model.NearbyAttraction;
 import com.openclassrooms.tourguide.model.user.User;
 import com.openclassrooms.tourguide.model.user.UserReward;
-import com.openclassrooms.tourguide.service.model.AttractionService;
+import com.openclassrooms.tourguide.service.model.NearbyAttractionService;
 import com.openclassrooms.tourguide.service.model.UserRewardService;
 import com.openclassrooms.tourguide.service.model.UserService;
 import gpsUtil.location.Attraction;
@@ -40,7 +40,7 @@ public class TourGuideControllerTests {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private AttractionService attractionService;
+    private NearbyAttractionService nearbyAttractionService;
     @MockitoBean
     private UserService userService;
     @MockitoBean
@@ -93,14 +93,14 @@ public class TourGuideControllerTests {
         NearbyAttraction nearbyAttraction = new NearbyAttraction("name", 1.0, 1.0, 1.0, 1.0, 1.0, 1);
         List<NearbyAttraction> nearbyAttractions = List.of(nearbyAttraction);
         when(userService.getUser(anyString())).thenReturn(user);
-        when(attractionService.getNearbyAttractions(any(User.class))).thenReturn(nearbyAttractions);
+        when(nearbyAttractionService.getNearbyAttractions(any(User.class))).thenReturn(nearbyAttractions);
 
         mockMvc.perform(get("/getNearbyAttractions")
                         .param("userName", user.getUserName()))
                 .andExpect(status().isOk());
 
         verify(userService).getUser(anyString());
-        verify(attractionService).getNearbyAttractions(any(User.class));
+        verify(nearbyAttractionService).getNearbyAttractions(any(User.class));
     }
 
     @Test

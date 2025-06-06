@@ -8,6 +8,11 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Handles Tracker: initialization in dev and prod profiles, shutdown
+ * @see Tracker
+ *
+ */
 @Component
 public class TrackerManager {
     private static final Logger logger = LoggerFactory.getLogger(TrackerManager.class);
@@ -19,6 +24,10 @@ public class TrackerManager {
         this.tracker = tracker;
     }
 
+    /**
+     * Submits Tracker to executor service to initialize it.
+     * Creates shutDownHook to handle shut down when the application stops.
+     */
     void initializeTracker () {
         executorService.submit(tracker);
         addShutDownHook();
@@ -30,10 +39,5 @@ public class TrackerManager {
             executorService.shutdownNow();
             logger.info("Tracker stopped");
         }));
-    }
-
-    public void stopTracking() {
-        stop = true;
-        executorService.shutdownNow();
     }
 }

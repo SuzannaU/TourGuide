@@ -11,6 +11,11 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Handles general application attributes, and selectively initializes users and tracker according to the active profile
+ * @see InternalUsersManager
+ * @see TrackerManager
+ */
 @Component
 public class AppManager {
     private final Logger logger = LoggerFactory.getLogger(AppManager.class);
@@ -37,6 +42,9 @@ public class AppManager {
             InternalUsersManager.initializeInternalUsers(internalUserNumber);
             trackerManager.initializeTracker();
             logger.info("Active profile: dev");
+        } else if (Arrays.asList(activeProfiles).contains("prod")) {
+            trackerManager.initializeTracker();
+            logger.info("Active profile: prod");
         } else {
             InternalUsersManager.initializeInternalUsers(internalUserNumber);
             trackerManager.initializeTracker();

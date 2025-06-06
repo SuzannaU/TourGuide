@@ -3,7 +3,7 @@ package com.openclassrooms.tourguide.service;
 import com.openclassrooms.tourguide.manager.InternalUsersManager;
 import com.openclassrooms.tourguide.model.NearbyAttraction;
 import com.openclassrooms.tourguide.model.user.User;
-import com.openclassrooms.tourguide.service.model.AttractionService;
+import com.openclassrooms.tourguide.service.model.NearbyAttractionService;
 import com.openclassrooms.tourguide.service.model.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,10 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class AttractionServiceTest {
+public class NearbyAttractionServiceTest {
 
     @Autowired
-    private AttractionService attractionService;
+    private NearbyAttractionService nearbyAttractionService;
 
     @Autowired
     private UserService userService;
@@ -39,7 +39,7 @@ public class AttractionServiceTest {
         userService.addUser(user);
         userService.trackUserLocation(user).join();
 
-        List<NearbyAttraction> attractions = attractionService.getNearbyAttractions(user);
+        List<NearbyAttraction> attractions = nearbyAttractionService.getNearbyAttractions(user);
 
         assertEquals(5, attractions.size());
         assertTrue(attractions.get(0).getDistance() < attractions.get(1).getDistance());

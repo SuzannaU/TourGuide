@@ -15,6 +15,11 @@ import org.slf4j.LoggerFactory;
 import com.openclassrooms.tourguide.model.user.User;
 import org.springframework.stereotype.Component;
 
+/**
+ * Is responsible for tracking users' location at specified intervals.
+ * Runs in its own separate Thread.
+ * @see TrackerManager
+ */
 @Component
 public class Tracker implements Runnable {
     private final Logger logger = LoggerFactory.getLogger(Tracker.class);
@@ -25,6 +30,11 @@ public class Tracker implements Runnable {
         this.userService = UserService;
     }
 
+    /**
+     * Tracks users' location according to the polling interval, sleeps in between polling
+     *
+     * @see UserService
+     */
     @Override
     public void run() {
         StopWatch stopWatch = new StopWatch();

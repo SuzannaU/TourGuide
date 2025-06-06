@@ -6,8 +6,6 @@ import com.openclassrooms.tourguide.service.libs.GpsUtilService;
 import com.openclassrooms.tourguide.service.libs.RewardCentralService;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,9 +13,12 @@ import java.util.concurrent.*;
 
 import static com.openclassrooms.tourguide.manager.AppManager.EXECUTOR_SERVICE;
 
+/**
+ * Provides methods related to UserReward model object
+ * @see UserReward
+ */
 @Service
 public class UserRewardService {
-    private final Logger logger = LoggerFactory.getLogger(UserRewardService.class);
 
     private final GpsUtilService gpsUtilService;
     private final RewardCentralService rewardCentralService;
@@ -29,6 +30,14 @@ public class UserRewardService {
         this.locationUtil = locationUtil;
     }
 
+    /**
+     * Retrieves a list of Attractions from GpsUtil and goes through them.
+     * If an attraction is close to the user's location, it creates a UserReward related to that attraction and adds it to the user's list of UserRewards.
+     * Async operations are using the app's common executor service.
+     *
+     * @param user
+     * @return a CompletableFuture<Void>
+     */
     public CompletableFuture<Void> calculateRewards(User user) {
         List<VisitedLocation> userLocations = user.getVisitedLocations();
         CompletableFuture<List<Attraction>> attractionsFuture = CompletableFuture.supplyAsync(gpsUtilService::getAttractions, EXECUTOR_SERVICE);
