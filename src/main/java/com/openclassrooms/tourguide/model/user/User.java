@@ -36,7 +36,7 @@ public class User {
         visitedLocations.clear();
     }
 
-    public void addUserReward(UserReward userReward) {
+    public synchronized void addUserReward(UserReward userReward) {
         if (userRewards.stream().noneMatch(r -> r.getAttraction().attractionName.equals(userReward.getAttraction().attractionName))) {
             userRewards.add(userReward);
         }
